@@ -3,7 +3,6 @@
 ;; Copyright (C) 2017  Panji Kusuma
 
 ;; Author: Panji Kusuma <epanji@gmail.com>
-;; Created: 13 August 2017
 ;; Keywords: convenience, qzuma
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -75,6 +74,33 @@
   "Capitalize only first character from NAME."
   (concat (capitalize (substring name 0 1))
           (substring name 1)))
+
+(defun qz-trim-field (name)
+  "Remove table name from field if exist. \
+\(\"table.field\" => \"field\"\)"
+  (let ((pos (or (string-match "[\.]" name) -1)))
+    (substring name (+ pos 1))))
+
+(defun qz-prefix-field (name)
+  "Remove '~s' '~es' in plural name and add _ as prefix, 
+only if it's a key"
+  (let ((table (qz-table-name name)))
+    (if (string-match "[\.]+[a-z]*id$" name)
+        (cond ((string-match "es$" table)
+               (concat (substring table 0 -2) "_"))
+              ((string-match "ss$" table)
+               (concat table "_"))
+              ((string-match "s$" table)
+               (concat (concat (substring table 0 -1) "_")))
+              (t (concat table "_")))
+      "")))
+
+(defun qz-join-field (table1 table2key)
+  "Add prefix for foreign key in main table. \
+\(\"table2.key\" => \"table1.prefix_key\"\)"
+  (let ((prefix (qz-prefix-field table2key))
+        (field (qz-trim-field table2key)))
+    (format "%s.%s%s" table1 prefix field)))
 
 (provide 'qzuma-core)
 ;;; qzuma-core.el ends here

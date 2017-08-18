@@ -3,7 +3,6 @@
 ;; Copyright (C) 2017  Panji Kusuma
 
 ;; Author: Panji Kusuma <epanji@gmail.com>
-;; Created: 13 August 2017
 ;; Keywords: convenience, qzuma
 
 ;; This program is free software; you can redistribute it and/or modify
