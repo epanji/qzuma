@@ -107,7 +107,7 @@ only if the NAME is a key or EXCEPTION is true."
     (setq exception nil))
   (let ((table (qz-table-name name)))
     (if (or (string-match "[\.]+[a-z]*id$" name) exception)
-        (concat (qz-to-singular name) separator) "")))
+        (concat (qz-to-singular table) separator) "")))
 
 (defun qz-join-field (table-1 table-2-pk)
   "Add prefix for foreign key in main table. \
