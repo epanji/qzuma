@@ -86,13 +86,16 @@
                  0)))
     (substring name pos)))
 
-(defun qz-prefix-field (name &optional separator)
+(defun qz-prefix-field (name &optional separator exception)
   "Remove '~s' '~es' in plural name and add SEPARATOR as prefix, 
-only if the NAME is a key."
+only if the NAME is a key or EXCEPTION is true."
   (unless separator
     (setq separator "_"))
+  (unless exception
+    (setq exception nil))
   (let ((table (qz-table-name name)))
-    (if (string-match "[\.]+[a-z]*id$" name)
+    (if (or (string-match "[\.]+[a-z]*id$" name)
+            exception)
         (cond ((string-match "ies$" table)
                (concat (substring table 0 -3) "y" separator))
               ((string-match "[hrsx]es$" table)
@@ -103,12 +106,24 @@ only if the NAME is a key."
                (concat (concat (substring table 0 -1) separator)))
               (t (concat table separator))) "")))
 
-(defun qz-join-field (table1 table2key)
+(defun qz-join-field (table-1 table-2-pk)
   "Add prefix for foreign key in main table. \
-\(\"table2.key\" => \"table1.prefix_key\"\)"
-  (let ((prefix (qz-prefix-field table2key))
-        (field (qz-trim-field table2key)))
-    (format "%s.%s%s" table1 prefix field)))
+\(\"table-2.key\" => \"table-1.prefix_key\"\)"
+  (let ((prefix (qz-prefix-field table-2-pk))
+        (field (qz-trim-field table-2-pk)))
+    (format "%s.%s%s" table-1 prefix field)))
+
+(defun qz-localize-fields (fields)
+  "Localize foreign key if exists."
+  (let ((table (qz-table-name fields))
+        (primary-key (car fields))
+        (flag (car (reverse fields))))
+    (mapcar #'(lambda (f)
+                (if (or (string-equal f primary-key)
+                        (string-equal f flag))
+                    f
+                  (qz-join-field table f)))
+            fields)))
 
 (provide 'qzuma-core)
 ;;; qzuma-core.el ends here
