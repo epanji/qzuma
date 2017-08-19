@@ -75,25 +75,33 @@
   (concat (capitalize (substring name 0 1))
           (substring name 1)))
 
-(defun qz-trim-field (name)
+(defun qz-trim-field (name &optional regex)
   "Remove table name from field if exist. \
 \(\"table.field\" => \"field\"\)"
-  (let ((pos (or (string-match "[\.]" name) -1)))
-    (substring name (+ pos 1))))
+  (unless regex
+    (setq regex "[\.]"))
+  (let ((pos (or (progn
+                   (string-match regex name)
+                   (match-end 0))
+                 0)))
+    (substring name pos)))
 
-(defun qz-prefix-field (name)
-  "Remove '~s' '~es' in plural name and add _ as prefix, 
-only if it's a key"
+(defun qz-prefix-field (name &optional separator)
+  "Remove '~s' '~es' in plural name and add SEPARATOR as prefix, 
+only if the NAME is a key."
+  (unless separator
+    (setq separator "_"))
   (let ((table (qz-table-name name)))
     (if (string-match "[\.]+[a-z]*id$" name)
-        (cond ((string-match "es$" table)
-               (concat (substring table 0 -2) "_"))
-              ((string-match "ss$" table)
-               (concat table "_"))
+        (cond ((string-match "ies$" table)
+               (concat (substring table 0 -3) "y" separator))
+              ((string-match "[hrsx]es$" table)
+               (concat (substring table 0 -2) separator))
+              ((string-match "[ws]s$" table)
+               (concat table separator))
               ((string-match "s$" table)
-               (concat (concat (substring table 0 -1) "_")))
-              (t (concat table "_")))
-      "")))
+               (concat (concat (substring table 0 -1) separator)))
+              (t (concat table separator))) "")))
 
 (defun qz-join-field (table1 table2key)
   "Add prefix for foreign key in main table. \
