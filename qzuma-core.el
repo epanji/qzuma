@@ -86,6 +86,18 @@
                  0)))
     (substring name pos)))
 
+(defun qz-to-singular (name)
+  "Change plural english NAME to singular english name if needed."
+  (cond ((string-match "ies$" name)
+         (concat (substring name 0 -3) "y"))
+        ((string-match "[hrsx]es$" name)
+         (substring name 0 -2))
+        ((string-match "[ws]s$" name)
+         name)
+        ((string-match "s$" name)
+         (substring name 0 -1))
+        (t name)))
+
 (defun qz-prefix-field (name &optional separator exception)
   "Remove '~s' '~es' in plural name and add SEPARATOR as prefix, 
 only if the NAME is a key or EXCEPTION is true."
@@ -94,17 +106,8 @@ only if the NAME is a key or EXCEPTION is true."
   (unless exception
     (setq exception nil))
   (let ((table (qz-table-name name)))
-    (if (or (string-match "[\.]+[a-z]*id$" name)
-            exception)
-        (cond ((string-match "ies$" table)
-               (concat (substring table 0 -3) "y" separator))
-              ((string-match "[hrsx]es$" table)
-               (concat (substring table 0 -2) separator))
-              ((string-match "[ws]s$" table)
-               (concat table separator))
-              ((string-match "s$" table)
-               (concat (concat (substring table 0 -1) separator)))
-              (t (concat table separator))) "")))
+    (if (or (string-match "[\.]+[a-z]*id$" name) exception)
+        (concat (qz-to-singular name) separator) "")))
 
 (defun qz-join-field (table-1 table-2-pk)
   "Add prefix for foreign key in main table. \
@@ -114,7 +117,7 @@ only if the NAME is a key or EXCEPTION is true."
     (format "%s.%s%s" table-1 prefix field)))
 
 (defun qz-localize-fields (fields)
-  "Localize foreign key if exists."
+  "Localize foreign key in the fields if exists."
   (let ((table (qz-table-name fields))
         (primary-key (car fields))
         (flag (car (reverse fields))))
@@ -124,6 +127,12 @@ only if the NAME is a key or EXCEPTION is true."
                     f
                   (qz-join-field table f)))
             fields)))
+
+(defun qz-form-field (name)
+  "Change table field into form field name."
+  (concat
+   (qz-prefix-field name "_" t)
+   (qz-trim-field name)))
 
 (provide 'qzuma-core)
 ;;; qzuma-core.el ends here
