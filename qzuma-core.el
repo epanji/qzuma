@@ -38,7 +38,7 @@
 
 (defun qz-table-p (fields)
   "Make sure the first is primary key and last is data flag."
-  (if (and (string-match "[\.]id$" (car fields))
+  (if (and (qz-identity-p (car fields))
            (string-match "[\.]flag$" (car (last fields))))
       t nil))
 
@@ -70,18 +70,22 @@
 
 ;; others
 
+(defun qz-identity-p (name)
+  "Regex to identify identity."
+  (integerp (string-match "[\.][gu]*id$" name)))
+
 (defun qz-upper-first (name)
   "Capitalize only first character from NAME."
   (concat (capitalize (substring name 0 1))
           (substring name 1)))
 
-(defun qz-trim-field (name &optional regex)
+(defun qz-trim-field (name &optional separator)
   "Remove table name from field if exist. \
 \(\"table.field\" => \"field\"\)"
-  (unless regex
-    (setq regex "[\.]"))
+  (unless separator
+    (setq separator "."))
   (let ((pos (or (progn
-                   (string-match regex name)
+                   (string-match (format "[%s]+" separator) name)
                    (match-end 0))
                  0)))
     (substring name pos)))
@@ -106,7 +110,7 @@ only if the NAME is a key or EXCEPTION is true."
   (unless exception
     (setq exception nil))
   (let ((table (qz-table-name name)))
-    (if (or (string-match "[\.]+[a-z]*id$" name) exception)
+    (if (or (qz-identity-p name) exception)
         (concat (qz-to-singular table) separator) "")))
 
 (defun qz-join-field (table-1 table-2-pk)
@@ -116,17 +120,31 @@ only if the NAME is a key or EXCEPTION is true."
         (field (qz-trim-field table-2-pk)))
     (format "%s.%s%s" table-1 prefix field)))
 
-(defun qz-localize-fields (fields)
-  "Localize foreign key in the fields if exists."
+(defun qz-localize-fields (fields &optional pure)
+  "Localize foreign key in the fields if exists.
+When PURE is true, exclude other foreign field from fields."
   (let ((table (qz-table-name fields))
         (primary-key (car fields))
-        (flag (car (reverse fields))))
-    (mapcar #'(lambda (f)
-                (if (or (string-equal f primary-key)
-                        (string-equal f flag))
-                    f
-                  (qz-join-field table f)))
-            fields)))
+        (flag (car (reverse fields)))
+        (result))
+    (setq
+     result
+     (mapcar
+      #'(lambda (f)
+          (if (or (string-equal f primary-key)
+                  (string-equal f flag)
+                  (string-equal table (qz-table-name f))
+                  (not (qz-identity-p f)))
+              f
+            (qz-join-field table f)))
+      fields))
+    (if pure
+        (remq nil
+              (mapcar
+               #'(lambda (f)
+                   (when (string-equal table (qz-table-name f)) f))
+               result))
+      result)))
 
 (defun qz-form-field (name)
   "Change table field into form field name."
