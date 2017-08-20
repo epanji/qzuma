@@ -131,8 +131,9 @@ BODY:       a cons as association list."
                            (format "%s-%d" (cdr item) (+ count 1)))))))
        body)
       (setq count (+ count 1)))
-    `(defvar ,(intern list-name) nil)
-    `(setq ,(intern list-name) '(,@container))))
+    `(progn
+       (defvar ,(intern list-name) nil)
+       (setq ,(intern list-name) '(,@container)))))
 
 (defmacro qz-define-field-type (prefix type-name alias-type &rest body)
   "Create variable string sequence with predicate function represent
