@@ -99,7 +99,8 @@
   (unless neol
     (setq neol 0))
   (concat
-   (qz-tcgciws-get-content (butlast fields) ntab neol)
+   (qz-tcgciws-get-content
+    (butlast (qz-localize-fields fields)) ntab neol)
    (qz-line 0 1 "")
    (qz-tcgciws-get-query-content fields ntab neol)))
 
@@ -130,13 +131,12 @@
 
 (defun qz-tcgciws-get-join-fields (fields)
   "Filter fields for join."
-  (let ((table (qz-table-name fields))
-        (names (rest (butlast fields))))
+  (let ((names (rest (butlast fields))))
     (delq
      nil
      (mapcar
       (lambda (field)
-        (unless (string-match (concat table ".") field)
+        (when (qz-identity-p field)
           field))
       names))))
 
@@ -176,7 +176,7 @@
               container
               (qz-line ntab 0 "$this->db->join(")
               (qz-line 0 0 (format "'%s', " (qz-table-name id)))
-              (qz-line 0 0 (format "'%s=" id))
+              (qz-line 0 0 (format "'%s = " id))
               (qz-line 0 1 (format "%s');" (qz-join-field table id))))))
           joins)
          container))
@@ -191,9 +191,8 @@
               container
               (qz-line ntab 0 "$this->db->where")
               (qz-line 0 0 (format "('%s', " field))
-              (qz-line 0 0 "$this->input->post")
-              (qz-line 0 0 (format "('f_%s_" (qz-prefix-field field)))
-              (qz-line 0 1 (format "%s'));" (qz-trim-field field))))))
+              (qz-line 0 0 "$this->input->post(")
+              (qz-line 0 1 (format "'%s'));" (qz-form-field field))))))
           wheres)
          container))
      (qz-line ntab 0 (format "$q_%s = $this->" table))
@@ -211,12 +210,16 @@
   (unless neol
     (setq neol 0))
   (concat
-   (qz-tcgciws-fields-validation (cdr (butlast fields)) ntab neol)
+   (qz-tcgciws-fields-validation
+    (cdr (butlast (qz-localize-fields fields t))) ntab neol)
    (qz-line 0 1 "")
-   (qz-tcgciws-if-post-open (cdr (butlast fields)) ntab neol)
-   (qz-tcgciws-if-post-content (butlast fields) (+ ntab 2) neol)
+   (qz-tcgciws-if-post-open
+    (cdr (butlast (qz-localize-fields fields))) ntab neol)
+   (qz-tcgciws-if-post-content
+    (butlast (qz-localize-fields fields t)) (+ ntab 2) neol)
    (qz-line 0 1 "")
-   (qz-tcgciws-if-post-insert-update fields (+ ntab 2) neol)
+   (qz-tcgciws-if-post-insert-update
+    (qz-localize-fields fields) (+ ntab 2) neol)
    (qz-line (+ ntab 2) 1 "$data['data'] = \"Sukses\";")
    (qz-tcgciws-if-post-close ntab neol t)))
 
@@ -226,16 +229,20 @@
     (setq ntab 0))
   (unless neol
     (setq neol 0))
-  (let ((valids (qz-tcgciws-get-filtered-fields fields "validations")))
+  (let ((valids (qz-tcgciws-get-filtered-fields
+                 (qz-localize-fields fields) "validations")))
     (concat
      (qz-tcgciws-fields-validation valids ntab neol)
      (qz-line 0 1 "")
-     (qz-tcgciws-if-post-open (butlast fields) ntab neol)
-     (qz-tcgciws-get-content (butlast fields) (+ ntab 2) neol)
+     (qz-tcgciws-if-post-open
+      (butlast (qz-localize-fields fields)) ntab neol)
+     (qz-tcgciws-get-content
+      (butlast (qz-localize-fields fields)) (+ ntab 2) neol)
      (qz-line 0 1 "")
-     (qz-tcgciws-get-query-content fields (+ ntab 2) neol
-                           (qz-tcgciws-get-filtered-fields
-                            fields "query conditions"))
+     (qz-tcgciws-get-query-content
+      fields (+ ntab 2) neol
+      (qz-tcgciws-get-filtered-fields
+       (qz-localize-fields fields) "query conditions"))
      (qz-tcgciws-if-post-close ntab neol))))
 
 (defun qz-tcgciws-if-post-insert-update (fields &optional ntab neol)
@@ -245,13 +252,14 @@
   (unless neol
     (setq neol 0))
   (let ((table (qz-table-name fields))
-        (field (qz-trim-field (car fields))))
+        (field (car fields)))
     (concat
-     (qz-line ntab 0 (format "if ($%s = " field))
+     (qz-line ntab 0 (format "if ($%s = " (qz-form-field field)))
      (qz-line 0 0 "$this->input->post")
-     (qz-line 0 1 (format "('f_%s')) {" field))
+     (qz-line 0 1 (format "('%s')) {" (qz-form-field field)))
      (qz-line (+ ntab 1) 0 "$this->db->where")
-     (qz-line 0 1 (format "('%s', $%s);" field field))
+     (qz-line 0 0 (format "('%s'" (qz-trim-field field)))
+     (qz-line 0 1 (format ", $%s);" (qz-form-field field)))
      (qz-line (+ ntab 1) 0 "$this->db->update")
      (qz-line 0 1 (format "('%s', $data_%s);" table table))
      (qz-line ntab 1 "} else {")
@@ -277,7 +285,7 @@
                    )))
     (concat
      (qz-line ntab 0 "if ($this->input->post")
-     (qz-line 0 1 (format "('f_%s')) {" (qz-trim-field choosen)))
+     (qz-line 0 1 (format "('%s')) {" (qz-form-field choosen)))
      (qz-line (+ ntab 1) 0 "if ($this->form_validation")
      (qz-line 0 1 "->run() !== FALSE) {")
      (qz-line 0 neol ""))))
@@ -299,7 +307,7 @@
          (qz-line ntab 0 (format "$data_%s" table))
          (qz-line 0 0 (format "['%s'] = " (qz-trim-field field)))
          (qz-line 0 0 "$this->input->post(")
-         (qz-line 0 1 (format "'f_%s');" (qz-trim-field field))))))
+         (qz-line 0 1 (format "'%s');" (qz-form-field field))))))
      (cdr fields))
     (qz-line 0 neol posts)))
 
@@ -336,8 +344,7 @@
         (concat
          validations
          (qz-line ntab 0 "$this->form_validation->set_rules(")
-         (qz-line 0 0 (format "'f_%s" (qz-prefix-field field)))
-         (qz-line 0 0 (format "_%s', " (qz-trim-field field)))
+         (qz-line 0 0 (format "'%s', " (qz-form-field field)))
          (qz-line 0 0 (format "'%s', " (qz-trim-field field)))
          (qz-line 0 1 "'required');"))))
      fields)
