@@ -121,5 +121,150 @@ EXCEPTION could be the name of table as string or just symbol t."
                (qz-line ntab neol (qz-ci-query-select-line f op sp table))))
          newfields "")) ""))
 
+
+
+(qz-define-field-type
+ "qz-ci" "picture" "type=\"file\""
+
+ ;; english
+
+ "icon[s]?$"
+ "image[s]?$"
+ "logo[s]?$"
+ "photo[s]?$"
+ "picture[s]?$"
+
+ ;; indonesia
+
+ "foto$"
+ "gambar$"
+ "ikon$")
+
+(qz-define-field-type
+ "qz-ci" "audio" "type=\"file\""
+
+ ;; english
+
+ "audio[s]?$"
+ "music[s]?$"
+ "sound[s]?$"
+
+ ;; indonesia
+
+ "lagu$"
+ "musik$"
+ "suara$")
+
+(qz-define-field-type
+ "qz-ci" "video" "type=\"file\""
+
+ ;; english
+
+ "clip[s]?$"
+ "movie[s]?$"
+ "video[s]?$"
+
+ ;; indonesia
+
+ "film$"
+ "klip$"
+ "vidio$")
+
+(qz-define-field-type
+ "qz-ci" "file" "type=\"file\""
+
+ ;; english
+
+ "file[s]?$"
+ "image[s]?$"
+
+ ;; indonesia
+
+ "berkas$")
+
+(setq qz-ci-file
+      (append qz-ci-file
+              qz-ci-picture
+              qz-ci-audio
+              qz-ci-video))
+
+
+
+(defun qz-ci-define-private-upload (&optional ntab neol)
+  "Create private function upload for model."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (concat
+   (qz-line ntab 0 "private function _do_upload")
+   (qz-line 0 neol "($config, $name, $table = '') {")
+   (qz-line (+ ntab 1) neol "$filename = '';")
+   (qz-line (+ ntab 1) neol "$this->upload->initialize($config);")
+   (qz-line (+ ntab 1) neol "if (isset($_FILES[$name]['name'])) {")
+   (qz-line (+ ntab 2) neol "if ($this->upload->do_upload($name)) {")
+   (qz-line (+ ntab 3) neol "$data = $this->upload->data();")
+   (qz-line (+ ntab 3) neol "if ($table != '') {")
+   (qz-line (+ ntab 4) neol "$filename = $data['file_name'];")
+   (qz-line (+ ntab 3) neol "}")
+   (qz-line (+ ntab 2) neol "}")
+   (qz-line (+ ntab 1) neol "}")
+   (qz-line (+ ntab 1) neol "return $filename;")
+   (qz-line ntab neol "}")))
+
+(defun qz-ci-define-function-upload (name &optional ntab neol)
+  "Create upload function depends on name."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (cond
+   ((string-equal name "picture")
+    (concat
+     (qz-line ntab 0 "public function do_upload_picture")
+     (qz-line 0 neol "($name, $table = '') {")
+     (qz-line (+ ntab 1) neol "$config['encrypt_name'] = true;")
+     (qz-line (+ ntab 1) neol "$config['upload_path'] = './uploads/';")
+     (qz-line (+ ntab 1) neol "$config['allowed_types'] = 'gif|jpg|png';")
+     (qz-line (+ ntab 1) neol "$config['max_size']	= '10000';")
+     (qz-line (+ ntab 1) neol "$config['max_width']  = '10240';")
+     (qz-line (+ ntab 1) (+ neol 1) "$config['max_height']  = '7680';")
+     (qz-line (+ ntab 1) 0 "return $this->_do_upload")
+     (qz-line 0 neol "($config, $name, $table);")
+     (qz-line ntab neol "}")))
+   ((string-equal name "audio")
+    (concat
+     (qz-line ntab 0 "public function do_upload_audio")
+     (qz-line 0 neol "($name, $table = '') {")
+     (qz-line (+ ntab 1) neol "$config['encrypt_name'] = true;")
+     (qz-line (+ ntab 1) neol "$config['upload_path'] = './uploads/';")
+     (qz-line (+ ntab 1) neol "$config['allowed_types'] = 'mp3';")
+     (qz-line (+ ntab 1) (+ neol 1) "$config['max_size']	= '100000';")
+     (qz-line (+ ntab 1) 0 "return $this->_do_upload")
+     (qz-line 0 neol "($config, $name, $table);")
+     (qz-line ntab neol "}")))
+   ((string-equal name "video")
+    (concat
+     (qz-line ntab 0 "public function do_upload_video")
+     (qz-line 0 neol "($name, $table = '') {")
+     (qz-line (+ ntab 1) neol "$config['encrypt_name'] = true;")
+     (qz-line (+ ntab 1) neol "$config['upload_path'] = './uploads/';")
+     (qz-line (+ ntab 1) neol "$config['allowed_types'] = 'mp4';")
+     (qz-line (+ ntab 1) (+ neol 1) "$config['max_size']	= '100000';")
+     (qz-line (+ ntab 1) 0 "return $this->_do_upload")
+     (qz-line 0 neol "($config, $name, $table);")
+     (qz-line ntab neol "}")))
+   ((string-equal name "file")
+    (concat
+     (qz-line ntab 0 "public function do_upload_file")
+     (qz-line 0 neol "($name, $table = '') {")
+     (qz-line (+ ntab 1) neol "$config['encrypt_name'] = true;")
+     (qz-line (+ ntab 1) neol "$config['upload_path'] = './uploads/';")
+     (qz-line (+ ntab 1) neol "$config['allowed_types'] = 'pdf|doc|docx';")
+     (qz-line (+ ntab 1) (+ neol 1) "$config['max_size']	= '100000';")
+     (qz-line (+ ntab 1) 0 "return $this->_do_upload")
+     (qz-line 0 neol "($config, $name, $table);")
+     (qz-line (+ ntab 1) neol "}")))))
+
 (provide 'qzuma-ci-core)
 ;;; qzuma-ci-core.el ends here
