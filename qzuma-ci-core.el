@@ -55,5 +55,29 @@
              (qz-line ntab neol (qz-ci-line-post f)))
          newfields "")) ""))
 
+(defun qz-ci-line-validation (field)
+  "Create one line validation from field."
+  (concat "$this->form_validation->set_rules"
+          (format "('%s', '%s', 'required');"
+                  (qz-form-field field)
+                  (qz-trim-field field))))
+
+(defun qz-ci-data-validation (fields &optional ntab neol exception)
+  "Create multiple line validation format from fields."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (unless exception
+    (setq exception nil))
+  (if (or (qz-table-p fields) exception)
+      (let ((newfields (if exception
+                           fields
+                         (cdr (butlast (qz-localize-fields fields))))))
+        (mapconcat
+         #'(lambda (f)
+             (qz-line ntab neol (qz-ci-line-validation f)))
+         newfields "")) ""))
+
 (provide 'qzuma-ci-core)
 ;;; qzuma-ci-core.el ends here
