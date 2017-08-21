@@ -133,6 +133,23 @@
          (qz-line 1 0 "}")))
     (print "Selected region not well formatted")))
 
+(defun qz-tcgci-class-model (name)
+  "Create class models."
+  (concat
+   (qz-line 0 1 "<?php")
+   (qz-line 0 0 "defined('BASEPATH') OR ")
+   (qz-line 0 2 "exit('No direct script access allowed');")
+   (qz-line 0 0 (format "class %s_model " name))
+   (qz-line 0 1 "extends CI_Model")
+   (qz-line 0 1 "{")
+   (qz-line 1 1 "public function __construct() {")
+   (qz-line 2 1 "parent::__construct();")
+   (qz-line 0 1 "$this->load->library('pagination');")
+   (qz-line 0 1 "$this->load->library('form_validation');")
+   (qz-line 0 1 "$this->load->library('upload');")
+   (qz-line 1 2 "}")
+   (qz-line 0 0 "}")))
+
 ;; commands
 
 (defun qz-tcgci-create-controller ()
