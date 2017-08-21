@@ -32,14 +32,14 @@
           (qz-form-field field)))
 
 (defun qz-ci-line-post (field)
-  "Create one line post format."
+  "Create one line post format from field."
   (format "$data_%s['%s'] = %s;"
           (qz-table-name field)
           (qz-trim-field field)
           (qz-ci-post field)))
 
 (defun qz-ci-data-post (fields &optional ntab neol exception)
-  "Create multyline line post format from fields."
+  "Create multiple line post format from fields."
   (unless ntab
     (setq ntab 0))
   (unless neol
