@@ -79,5 +79,47 @@
              (qz-line ntab neol (qz-ci-line-validation f)))
          newfields "")) ""))
 
+(defun qz-ci-query-select (field &optional table)
+  "Create query string from field."
+  (format "%s AS %s" field
+          (if (string-equal table (qz-table-name field))
+              (qz-trim-field field)
+            (qz-form-field field))))
+
+(defun qz-ci-query-select-line (field &optional operator separator table)
+  "Create query string line from field."
+  (unless operator
+    (setq operator ".="))
+  (unless separator
+    (setq separator ""))
+  (format "$select %s \"%s%s \";"
+          operator
+          (qz-ci-query-select field table)
+          separator))
+
+(defun qz-ci-query-select-multi-line (fields &optional ntab neol exception)
+  "Create multi line query string from fields.
+EXCEPTION could be the name of table as string or just symbol t."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (unless exception
+    (setq exception nil))
+  (if (or (qz-table-p fields) exception)
+      (let* ((table (or exception
+                        (qz-table-name fields)))
+             (newfields (if exception
+                            fields
+                          (butlast (qz-localize-fields fields))))
+             (st (car newfields))
+             (lst (car (reverse newfields))))
+        (mapconcat
+         #'(lambda (f)
+             (let ((op (if (string-equal f st) " =" ".="))
+                   (sp (if (string-equal f lst) "" ",")))
+               (qz-line ntab neol (qz-ci-query-select-line f op sp table))))
+         newfields "")) ""))
+
 (provide 'qzuma-ci-core)
 ;;; qzuma-ci-core.el ends here
