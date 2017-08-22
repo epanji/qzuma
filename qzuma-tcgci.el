@@ -42,17 +42,46 @@
           (forward-line -1))
         (when (fboundp 'web-mode) (web-mode))
         (insert
+
          (qz-line 0 1 "")
          (qz-line 1 1 (format "public function %s() {" name))
          (qz-line 2 2 "$data = array();")
-         
-         ;; content get / set or if-get
-         ;; (qz-function-contents fields 2)
+
+         (qz-tcgci-method-contents fields name 2)
 
          (qz-line 0 1 "")
          (qz-ci-method-footer type class name)
          (qz-line 1 0 "}")))
     (print "Selected region not well formatted")))
+
+(defun qz-tcgci-method-contents (fields name &optional ntab neol)
+  "Create contents from fields."
+  ;; (cond
+  ;;  ((string-equal name "create")
+  ;;   (concat "model content create"))
+  ;;  ((string-equal name "read")
+  ;;   (concat "model content read"))
+  ;;  ((string-equal name "update")
+  ;;   (concat "model content update"))
+  ;;  ((string-equal name "delete")
+  ;;   (concat "model content delete")))
+  "")
+
+(defun qz-tcgci-upload-exists (fields &optional ntab neol)
+  "Add upload function for the type if exists."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (let ((uploads (qz-ci-upload-exists fields)))
+    (when uploads
+      (concat
+       (qz-line 0 1 "")
+       (qz-line 0 1 (qz-ci-define-private-upload ntab neol))
+       (mapconcat
+        #'(lambda (type)
+            (qz-ci-define-function-upload type ntab neol))
+        uploads (qz-line 0 1 ""))))))
 
 ;; commands
 
@@ -81,18 +110,20 @@
   "Create model from table fields in region."
   (interactive)
   (if (use-region-p)
-	  (let ((fields (qz-list-from-region
-                     (region-beginning)
-                     (region-end)))
-            (type "model")
-			(model (qz-upper-first (read-from-minibuffer
-                                    "Model name: "))))
+	  (let* ((fields (qz-list-from-region
+                      (region-beginning)
+                      (region-end)))
+             (type "model")
+             (model (qz-upper-first
+                     (qz-to-singular
+                      (qz-table-name fields)))))
 		(if (qz-table-p fields)
 			(progn
               (qz-open-clear-buffer (format "%s_model.php" model))
               (insert (qz-ci-class-wrapper model type))
               (qz-open-continue-buffer (format "%s_model.php" model))
-              (qz-tcgci-method fields "index" (format "%s_model" model))
+              (insert (qz-tcgci-upload-exists fields 1 1))
+              (qz-tcgci-method fields "create" (format "%s_model" model))
               ;; ok
               )
 		  (print "Selected region not well formatted")))
