@@ -266,5 +266,71 @@ EXCEPTION could be the name of table as string or just symbol t."
      (qz-line 0 neol "($config, $name, $table);")
      (qz-line ntab neol "}")))))
 
+(defun qz-ci-class-wrapper (name &optional type)
+  "Decide to return type class wrapper. \
+\(model, controller, default\)"
+  (unless type
+    (setq type "global"))
+  (cond
+   ((string-equal type "model")
+    (concat
+     (qz-line 0 1 "<?php")
+     (qz-line 0 0 "defined('BASEPATH') OR ")
+     (qz-line 0 2 "exit('No direct script access allowed');")
+     (qz-line 0 0 (format "class %s_model " name))
+     (qz-line 0 1 "extends CI_Model")
+     (qz-line 0 1 "{")
+     (qz-line 1 1 "public function __construct() {")
+     (qz-line 2 1 "parent::__construct();")
+     (qz-line 2 1 "$this->load->library('pagination');")
+     (qz-line 2 1 "$this->load->library('form_validation');")
+     (qz-line 2 1 "$this->load->library('upload');")
+     (qz-line 1 2 "}")
+     (qz-line 0 0 "}")))
+   ((string-equal type "controller")
+    (concat
+     (qz-line 0 1 "<?php")
+     (qz-line 0 0 "defined('BASEPATH') OR ")
+     (qz-line 0 2 "exit('No direct script access allowed');")
+     (qz-line 0 0 (format "class %s " name))
+     (qz-line 0 1 "extends CI_Controller")
+     (qz-line 0 1 "{")
+     (qz-line 1 1 "public function __construct() {")
+     (qz-line 2 1 "parent::__construct();")
+     (qz-line 1 2 "}")
+     (qz-line 0 0 "}")))
+   (t ;; global class wrapper
+    (concat
+     (qz-line 0 1 "<?php")
+     (qz-line 0 0 "defined('BASEPATH') OR ")
+     (qz-line 0 2 "exit('No direct script access allowed');")
+     (qz-line 0 0 (format "class %s " name))
+     (qz-line 0 1 "{")
+     (qz-line 1 2 "public function __construct() {")
+     (qz-line 1 2 "}")
+     (qz-line 0 0 "}")))))
+
+(defun qz-ci-method-footer (&optional type class name)
+  "Decide to which view for method. \
+\(controller, service\)"
+  (unless type
+    (setq type ""))
+  (unless class
+    (setq class "class"))
+  (unless name
+    (setq name "function"))
+  (cond
+   ((string-equal type "controller")
+    (concat
+     (qz-line 2 0 "$this->load->view('")
+     (qz-line 0 0 (downcase (concat class "_" name)))
+     (qz-line 0 1 "', $data);")))
+   ((string-equal type "service")
+    (concat
+     (qz-line 0 1 "")
+     (qz-line 2 1 "header('Content-Type: application/json');")
+     (qz-line 2 1 "echo json_encode($data);")))
+   (t "")))
+
 (provide 'qzuma-ci-core)
 ;;; qzuma-ci-core.el ends here
