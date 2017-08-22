@@ -332,5 +332,21 @@ EXCEPTION could be the name of table as string or just symbol t."
      (qz-line 2 1 "echo json_encode($data);")))
    (t "")))
 
+
+
+(defun qz-ci-upload-exists (fields)
+  "Get list file type if exists"
+  (remq
+   nil
+   (mapcar
+    #'(lambda (f)
+        (cond
+         ((qz-ci-picture-p f) "picture")
+         ((qz-ci-audio-p f) "audio")
+         ((qz-ci-video-p f) "video")
+         ((qz-ci-file-p f) "file")
+         (t nil)))
+    fields)))
+
 (provide 'qzuma-ci-core)
 ;;; qzuma-ci-core.el ends here
