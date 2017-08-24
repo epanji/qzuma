@@ -38,6 +38,28 @@
           (qz-trim-field field)
           (qz-ci-post field)))
 
+(defun qz-ci-file-post (field &optional ntab neol)
+  "Create one file post format from field."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (let ((form-name (qz-form-field field))
+        (field-name (qz-trim-field field))
+        (fname (cond ((qz-ci-picture-p field) "picture")
+                     ((qz-ci-audio-p field) "audio")
+                     ((qz-ci-video-p field) "video")
+                     ((qz-ci-file-p field) "file")
+                     (t nil))))
+    (when fname
+      (concat
+       (qz-line ntab 0 "if (($filename = $this->do_upload_")
+       (qz-line 0 0 (format "%s('%s'," fname form-name))
+       (qz-line 0 neol (format " '%s')) != '') {" field-name))
+       (qz-line (+ ntab 1) 0 (format "$data['%s']" field-name))
+       (qz-line 0 neol " = $filename;")
+       (qz-line ntab neol"}")))))
+
 (defun qz-ci-data-post (fields &optional ntab neol exception)
   "Create multiple line post format from fields."
   (unless ntab
@@ -49,11 +71,21 @@
   (if (or (qz-table-p fields) exception)
       (let ((newfields (if exception
                            fields
-                         (cdr (butlast (qz-localize-fields fields))))))
-        (mapconcat
-         #'(lambda (f)
-             (qz-line ntab neol (qz-ci-line-post f)))
-         newfields "")) ""))
+                         (cdr (butlast (qz-localize-fields fields)))))
+            files)
+        (concat
+         (mapconcat
+          #'(lambda (f)
+              (if (qz-ci-file-p f)
+                  (prog1 "" (setq files (cons f files)))
+                (qz-line ntab neol (qz-ci-line-post f))))
+          newfields "")
+         (if files
+             (mapconcat
+              #'(lambda (f)
+                  (qz-ci-file-post f ntab neol))
+              fields "")
+           ""))) ""))
 
 (defun qz-ci-line-validation (field)
   "Create one line validation from field."
