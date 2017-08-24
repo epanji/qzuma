@@ -45,27 +45,37 @@
 
          (qz-line 0 1 "")
          (qz-line 1 1 (format "public function %s() {" name))
-         (qz-line 2 2 "$data = array();")
 
          (qz-tcgci-method-contents fields name 2)
 
-         (qz-line 0 1 "")
          (qz-ci-method-footer type class name)
          (qz-line 1 0 "}")))
     (print "Selected region not well formatted")))
 
 (defun qz-tcgci-method-contents (fields name &optional ntab neol)
   "Create contents from fields."
-  ;; (cond
-  ;;  ((string-equal name "create")
-  ;;   (concat "model content create"))
-  ;;  ((string-equal name "read")
-  ;;   (concat "model content read"))
-  ;;  ((string-equal name "update")
-  ;;   (concat "model content update"))
-  ;;  ((string-equal name "delete")
-  ;;   (concat "model content delete")))
-  "")
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (let ((table (qz-table-name fields)))
+    (cond
+     ((string-equal name "create")
+      (concat
+       (qz-line ntab 0 (format "$data_%s" table))
+       (qz-line 0 2" = array();")
+       (qz-ci-data-post fields ntab neol)
+       (qz-line 0 1 "")
+       (qz-line ntab 0 "$this->db->insert(")
+       (qz-line 0 0 (format "'%s', " table))
+       (qz-line 0 neol (format "$data_%s);" table))
+       (qz-line ntab neol "return $this->db->insert_id();")))
+     ((string-equal name "read")
+      (concat "model content read"))
+     ((string-equal name "update")
+      (concat "model content update"))
+     ((string-equal name "delete")
+      (concat "model content delete")))))
 
 (defun qz-tcgci-upload-exists (fields &optional ntab neol)
   "Add upload function for the type if exists."
