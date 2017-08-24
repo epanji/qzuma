@@ -44,7 +44,8 @@
     (setq ntab 0))
   (unless neol
     (setq neol 1))
-  (let ((form-name (qz-form-field field))
+  (let ((table (qz-table-name field))
+        (form-name (qz-form-field field))
         (field-name (qz-trim-field field))
         (fname (cond ((qz-ci-picture-p field) "picture")
                      ((qz-ci-audio-p field) "audio")
@@ -56,7 +57,8 @@
        (qz-line ntab 0 "if (($filename = $this->do_upload_")
        (qz-line 0 0 (format "%s('%s'," fname form-name))
        (qz-line 0 neol (format " '%s')) != '') {" field-name))
-       (qz-line (+ ntab 1) 0 (format "$data['%s']" field-name))
+       (qz-line (+ ntab 1) 0 (format "$data_%s" table))
+       (qz-line 0 0 (format "['%s']" field-name))
        (qz-line 0 neol " = $filename;")
        (qz-line ntab neol"}")))))
 
@@ -71,7 +73,9 @@
   (if (or (qz-table-p fields) exception)
       (let ((newfields (if exception
                            fields
-                         (cdr (butlast (qz-localize-fields fields)))))
+                         (cdr (butlast
+                               (qz-localize-fields
+                                fields (not exception))))))
             files)
         (concat
          (mapconcat
