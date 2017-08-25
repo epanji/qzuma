@@ -28,7 +28,7 @@
 
 ;; functions
 
-(defun qz-tcgci-method (fields name &optional class type)
+(defun qz-tcgci-method (fields name &optional class type parameters)
   "Create function from table fields inside class."
   (if (qz-table-p fields)
       (progn
@@ -36,18 +36,18 @@
           (setq class "Debug"))
         (unless type
           (setq type "global"))
+        (unless parameters
+          (setq parameters ""))
         (qz-open-continue-buffer (concat class ".php"))
         (when (equal 1 (point-at-bol))
           (insert (qz-ci-class-wrapper name type))
           (forward-line -1))
         (when (fboundp 'web-mode) (web-mode))
         (insert
-
          (qz-line 0 1 "")
-         (qz-line 1 1 (format "public function %s() {" name))
-
+         (qz-line 1 0 (format "public function %s" name))
+         (qz-line 0 1 (format "(%s) {" parameters))
          (qz-tcgci-method-contents fields name 2)
-
          (qz-ci-method-footer type class name)
          (qz-line 1 0 "}")))
     (print "Selected region not well formatted")))
@@ -71,7 +71,19 @@
        (qz-line 0 neol (format "$data_%s);" table))
        (qz-line ntab neol "return $this->db->insert_id();")))
      ((string-equal name "read")
-      (concat "model content read"))
+      (concat
+       (qz-line ntab neol "$config['base_url'] = $base_url;")
+       (qz-line ntab neol "$config['per_page'] = $per_page;")
+       (qz-line ntab 0 "$config['total_rows'] = ")
+       (qz-line 0 0 "$this->db->count_all_results")
+       (qz-line 0 neol (format "('%s');" table))
+       (qz-line ntab 0 "$this->pagination")
+       (qz-line 0 (+ neol 1) "->initialize($config);")
+       (qz-line ntab neol "if ($per_page != '') {")
+       (qz-line (+ ntab 1) neol "$this->db->limit($per_page, $from);")
+       (qz-line ntab neol "}")
+       (qz-line ntab 0 "return $this->db->get")
+       (qz-line 0 neol (format "('%s');" table))))
      ((string-equal name "update")
       (concat "model content update"))
      ((string-equal name "delete")
@@ -134,6 +146,10 @@
               (qz-open-continue-buffer (format "%s_model.php" model))
               (insert (qz-tcgci-upload-exists fields 1 1))
               (qz-tcgci-method fields "create" (format "%s_model" model))
+              (qz-tcgci-method
+               fields "read" (format "%s_model" model) "model"
+               "$per_page='', $base_url='', $from=0")
+              
               ;; ok
               )
 		  (print "Selected region not well formatted")))
