@@ -73,7 +73,16 @@
      ((string-equal name "read")
       (concat
        (qz-line ntab neol "$config['base_url'] = $base_url;")
-       (qz-line ntab neol "$config['per_page'] = $per_page;")
+       (qz-line ntab (+ neol 1) "$config['per_page'] = $per_page;")
+       (qz-ci-query-select-multi-line fields ntab neol)
+       (qz-line 0 1 "")
+       (qz-line ntab neol "$this->db->flush_cache();")
+       (qz-line ntab neol "$this->db->start_cache();")
+       (qz-line ntab neol "$this->db->select($select);")
+       (qz-ci-data-join fields ntab neol)
+       (qz-line ntab 0 "$this->db->where")
+       (qz-line 0 neol (format "('%s.flag', '1');" table))
+       (qz-line ntab (+ neol 1) "$this->db->stop_cache();")
        (qz-line ntab 0 "$config['total_rows'] = ")
        (qz-line 0 0 "$this->db->count_all_results")
        (qz-line 0 neol (format "('%s');" table))
@@ -149,7 +158,7 @@
               (qz-tcgci-method
                fields "read" (format "%s_model" model) "model"
                "$per_page='', $base_url='', $from=0")
-              
+
               ;; ok
               )
 		  (print "Selected region not well formatted")))
