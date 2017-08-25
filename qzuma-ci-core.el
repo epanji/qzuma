@@ -157,6 +157,37 @@ EXCEPTION could be the name of table as string or just symbol t."
                (qz-line ntab neol (qz-ci-query-select-line f op sp table))))
          newfields "")) ""))
 
+(defun qz-ci-line-join (table field)
+  "Create line join codeigniter format."
+  (concat
+   "$this->db->join"
+   (format "('%s'" (qz-table-name field))
+   (format ", '%s " field)
+   (format "= %s');" (qz-join-field table field))))
+
+(defun qz-ci-data-join (fields &optional ntab neol exception)
+  "Create multiple line query join if exists.
+EXCEPTION must be the name of table as string or nil."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (unless exception
+    (setq exception nil))
+  (let ((table (or exception
+                   (qz-table-name fields)))
+        (joins (remq nil (mapcar #'(lambda (f)
+                                     (when (qz-identity-p f) f))
+                                 (if exception
+                                     fields
+                                   (cdr (butlast fields)))))))
+    (if joins
+        (mapconcat
+         #'(lambda (f)
+             (qz-line ntab neol (qz-ci-line-join table f)))
+         joins "")
+      "")))
+
 
 
 (qz-define-field-type
