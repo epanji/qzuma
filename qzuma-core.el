@@ -96,7 +96,7 @@
          (concat (substring name 0 -3) "y"))
         ((string-match "[hrsx]es$" name)
          (substring name 0 -2))
-        ((string-match "[ws]s$" name)
+        ((string-match "[iws]s$" name)
          name)
         ((string-match "s$" name)
          (substring name 0 -1))
