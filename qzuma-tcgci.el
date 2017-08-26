@@ -94,7 +94,29 @@
        (qz-line ntab 0 "return $this->db->get")
        (qz-line 0 neol (format "('%s');" table))))
      ((string-equal name "update")
-      (concat "model content update"))
+      (concat
+       (qz-line ntab 0 (format "$data_%s" table))
+       (qz-line 0 neol" = array();")
+       (qz-line ntab neol "if ($new_flag == '') {")
+       (qz-ci-data-post fields (+ ntab 1) neol)
+       (qz-line ntab neol "} else {")
+       (qz-line (+ ntab 1) neol "if ($old_flag != '') {")
+       (qz-line (+ ntab 2) 0 "$data_flag")
+       (qz-line 0 0 (format "['%s.flag'] = " table))
+       (qz-line 0 neol "$old_flag;")
+       (qz-line (+ ntab 2) 0 "$this->db->where")
+       (qz-line 0 0 (format "('%s.flag', " table))
+       (qz-line 0 neol "$new_flag);")
+       (qz-line (+ ntab 2) 0 "$this->db->update")
+       (qz-line 0 neol (format "('%s', $data_flag);" table))
+       (qz-line (+ ntab 1) neol "}")
+       (qz-line (+ ntab 1) 0 (format "$data_%s['%s." table table))
+       (qz-line 0 neol "flag'] = $new_flag;")
+       (qz-line ntab neol "}")
+       (qz-line ntab 0 "$this->db->where")
+       (qz-line 0 neol (format "('%s.id', $id);" table))
+       (qz-line ntab 0 "$this->db->update")
+       (qz-line 0 neol (format "('%s', $data_%s);" table table))))
      ((string-equal name "delete")
       (concat "model content delete")))))
 
@@ -157,7 +179,10 @@
               (qz-tcgci-method fields "create" (format "%s_model" model))
               (qz-tcgci-method
                fields "read" (format "%s_model" model) "model"
-               "$per_page='', $base_url='', $from=0")
+               "$per_page = '', $base_url = '', $from = 0")
+              (qz-tcgci-method
+               fields "update" (format "%s_model" model) "model"
+               "$id, $new_flag = '', $old_flag = ''")
 
               ;; ok
               )
