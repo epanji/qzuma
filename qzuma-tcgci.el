@@ -118,7 +118,13 @@
        (qz-line ntab 0 "$this->db->update")
        (qz-line 0 neol (format "('%s', $data_%s);" table table))))
      ((string-equal name "delete")
-      (concat "model content delete")))))
+      (concat
+       (qz-line ntab 0 "/* Preferable using ")
+       (qz-line 0 neol "update($id, 0) than this. */")
+       (qz-line ntab 0 "#$this->db->where")
+       (qz-line 0 neol (format "('%s.id', $id);" table))
+       (qz-line ntab 0 "#return $this->db->delete")
+       (qz-line 0 neol (format "('%s');" table)))))))
 
 (defun qz-tcgci-upload-exists (fields &optional ntab neol)
   "Add upload function for the type if exists."
@@ -183,6 +189,8 @@
               (qz-tcgci-method
                fields "update" (format "%s_model" model) "model"
                "$id, $new_flag = '', $old_flag = ''")
+              (qz-tcgci-method
+               fields "delete" (format "%s_model" model) "model" "$id")
 
               ;; ok
               )
