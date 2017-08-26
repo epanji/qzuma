@@ -72,24 +72,38 @@
        (qz-line ntab neol "return $this->db->insert_id();")))
      ((string-equal name "read")
       (concat
-       (qz-line ntab neol "$config['base_url'] = $base_url;")
-       (qz-line ntab (+ neol 1) "$config['per_page'] = $per_page;")
-       (qz-ci-query-select-multi-line fields ntab neol)
+       (qz-line ntab neol "if ($is_id) {")
+       (qz-line (+ ntab 1) 0 "$this->db->where")
+       (qz-line 0 neol (format "('%s.flag', 1);" table))
+       (qz-line (+ ntab 1) 0 "$this->db->where")
+       (qz-line 0 neol (format "('%s.id', $str_or_id);" table))
+       (qz-line ntab neol "} else {")
+       (qz-line (+ ntab 1) neol "$config['base_url'] = $base_url;")
+       (qz-line (+ ntab 1) neol "$config['per_page'] = $per_page;")
+       (qz-line (+ ntab 1) 0 "$config['reuse_query_string'] ")
+       (qz-line 0 (+ neol 1) "= true;")
+       (qz-ci-query-select-multi-line fields (+ ntab 1) neol)
        (qz-line 0 1 "")
-       (qz-line ntab neol "$this->db->flush_cache();")
-       (qz-line ntab neol "$this->db->start_cache();")
-       (qz-line ntab neol "$this->db->select($select);")
-       (qz-ci-data-join fields ntab neol)
-       (qz-line ntab 0 "$this->db->where")
+       (qz-line (+ ntab 1) neol "$this->db->flush_cache();")
+       (qz-line (+ ntab 1) neol "$this->db->start_cache();")
+       (qz-line (+ ntab 1) neol "$this->db->select($select);")
+       (qz-ci-data-join fields (+ ntab 1) neol)
+       (qz-line (+ ntab 1) 0 "$this->db->where")
        (qz-line 0 neol (format "('%s.flag', '1');" table))
-       (qz-line ntab (+ neol 1) "$this->db->stop_cache();")
-       (qz-line ntab 0 "$config['total_rows'] = ")
+       (qz-line (+ ntab 1) neol "if ($str_or_id != '') {")
+       (qz-line (+ ntab 2) 0 "$this->db->like")
+       (qz-line 0 0 (format "('%s'" (car (qz-exclude-keys fields))))
+       (qz-line 0 neol ", $str_or_id);")
+       (qz-line (+ ntab 1) neol "}")
+       (qz-line (+ ntab 1) (+ neol 1) "$this->db->stop_cache();")
+       (qz-line (+ ntab 1) 0 "$config['total_rows'] = ")
        (qz-line 0 0 "$this->db->count_all_results")
        (qz-line 0 neol (format "('%s');" table))
-       (qz-line ntab 0 "$this->pagination")
+       (qz-line (+ ntab 1) 0 "$this->pagination")
        (qz-line 0 (+ neol 1) "->initialize($config);")
-       (qz-line ntab neol "if ($per_page != '') {")
-       (qz-line (+ ntab 1) neol "$this->db->limit($per_page, $from);")
+       (qz-line (+ ntab 1) neol "if ($per_page != '') {")
+       (qz-line (+ ntab 2) neol "$this->db->limit($per_page, $from);")
+       (qz-line (+ ntab 1) neol "}")
        (qz-line ntab neol "}")
        (qz-line ntab 0 "return $this->db->get")
        (qz-line 0 neol (format "('%s');" table))))
@@ -124,7 +138,18 @@
        (qz-line ntab 0 "#$this->db->where")
        (qz-line 0 neol (format "('%s.id', $id);" table))
        (qz-line ntab 0 "#return $this->db->delete")
-       (qz-line 0 neol (format "('%s');" table)))))))
+       (qz-line 0 neol (format "('%s');" table))))
+     ((string-equal name "index")
+      (concat "controller->index for read data and search"))
+     ((string-equal name "add")
+      (concat "controller->add for create"))
+     ((string-equal name "edit")
+      (concat "controller->edit for update"))
+     ((string-equal name "remove")
+      (concat "controller->remove for update flag"))
+     ((string-equal name "detail")
+      (concat "controller->detail for read data detail"))
+     )))
 
 (defun qz-tcgci-upload-exists (fields &optional ntab neol)
   "Add upload function for the type if exists."
@@ -185,15 +210,16 @@
               (qz-tcgci-method fields "create" (format "%s_model" model))
               (qz-tcgci-method
                fields "read" (format "%s_model" model) "model"
-               "$per_page = '', $base_url = '', $from = 0")
+               (concat "$str_or_id = '', "
+                       "$is_id = false, "
+                       "$per_page = '', "
+                       "$base_url = '', "
+                       "$from = 0"))
               (qz-tcgci-method
                fields "update" (format "%s_model" model) "model"
                "$id, $new_flag = '', $old_flag = ''")
               (qz-tcgci-method
-               fields "delete" (format "%s_model" model) "model" "$id")
-
-              ;; ok
-              )
+               fields "delete" (format "%s_model" model) "model" "$id"))
 		  (print "Selected region not well formatted")))
 	(print "No region selected")))
 
