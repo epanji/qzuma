@@ -152,5 +152,13 @@ When PURE is true, exclude other foreign field from fields."
    (qz-prefix-field name "_" t)
    (qz-trim-field name)))
 
+(defun qz-exclude-keys (fields)
+  "Get fields with primary and foreign keys excluded."
+  (remq nil
+        (mapcar
+         #'(lambda (f)
+             (unless (string-match "[\._][gu]*id$" f) f))
+         fields)))
+
 (provide 'qzuma-core)
 ;;; qzuma-core.el ends here
