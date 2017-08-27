@@ -40,19 +40,19 @@
           (setq parameters ""))
         (qz-open-continue-buffer (concat class ".php"))
         (when (equal 1 (point-at-bol))
-          (insert (qz-ci-class-wrapper name type))
+          (insert (qz-ci-class-wrapper name type (qz-table-name fields)))
           (forward-line -1))
         (when (fboundp 'web-mode) (web-mode))
         (insert
          (qz-line 0 1 "")
          (qz-line 1 0 (format "public function %s" name))
          (qz-line 0 1 (format "(%s) {" parameters))
-         (qz-tcgci-method-contents fields name 2)
+         (qz-tcgci-method-contents fields name 2 1 class)
          (qz-ci-method-footer type class name)
          (qz-line 1 0 "}")))
     (print "Selected region not well formatted")))
 
-(defun qz-tcgci-method-contents (fields name &optional ntab neol)
+(defun qz-tcgci-method-contents (fields name &optional ntab neol controller)
   "Create contents from fields."
   (unless ntab
     (setq ntab 0))
@@ -140,7 +140,20 @@
        (qz-line ntab 0 "#return $this->db->delete")
        (qz-line 0 neol (format "('%s');" table))))
      ((string-equal name "index")
-      (concat "controller->index for read data and search"))
+      (concat
+       (qz-line ntab (+ neol 1) "$data = array();")
+       (qz-line ntab neol "$data['no'] = $page + 1;")
+       (qz-line ntab neol "$per_page = 10;")
+       (qz-line ntab 0 "$base_url = base_url()")
+       (qz-line 0 neol (format ".'%s';" (downcase controller)))
+       (qz-line ntab 0 "if(! $search = $this->input->get")
+       (qz-line 0 neol (format "('%s_search')) {" (downcase controller)))
+       (qz-line (+ ntab 1) neol "$search = '';")
+       (qz-line ntab neol "}")
+       (qz-line ntab 0 (format "$data['%s'] = " table))
+       (qz-line 0 0 (format "$this->%s_model" table))
+       (qz-line 0 0 "->read($search, false, $per_page, ")
+       (qz-line 0 neol "$base_url, $page);")))
      ((string-equal name "add")
       (concat "controller->add for create"))
      ((string-equal name "edit")
@@ -182,9 +195,9 @@
 		(if (qz-table-p fields)
 			(progn
               (qz-open-clear-buffer (format "%s.php" controller))
-              (insert (qz-ci-class-wrapper controller type))
+              (insert (qz-ci-class-wrapper controller type (qz-table-name fields)))
               (qz-open-continue-buffer (concat controller ".php"))
-              (qz-tcgci-method fields "index" controller type)
+              (qz-tcgci-method fields "index" controller type "$page = 0")
               ;; ok
               )
 		  (print "Selected region not well formatted")))
@@ -209,17 +222,17 @@
               (insert (qz-tcgci-upload-exists fields 1 1))
               (qz-tcgci-method fields "create" (format "%s_model" model))
               (qz-tcgci-method
-               fields "read" (format "%s_model" model) "model"
+               fields "read" (format "%s_model" model) type
                (concat "$str_or_id = '', "
                        "$is_id = false, "
                        "$per_page = '', "
                        "$base_url = '', "
                        "$from = 0"))
               (qz-tcgci-method
-               fields "update" (format "%s_model" model) "model"
+               fields "update" (format "%s_model" model) type
                "$id, $new_flag = '', $old_flag = ''")
               (qz-tcgci-method
-               fields "delete" (format "%s_model" model) "model" "$id"))
+               fields "delete" (format "%s_model" model) type "$id"))
 		  (print "Selected region not well formatted")))
 	(print "No region selected")))
 
