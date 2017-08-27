@@ -333,7 +333,7 @@ EXCEPTION must be the name of table as string or nil."
      (qz-line 0 neol "($config, $name, $table);")
      (qz-line ntab neol "}")))))
 
-(defun qz-ci-class-wrapper (name &optional type)
+(defun qz-ci-class-wrapper (name &optional type table)
   "Decide to return type class wrapper. \
 \(model, controller, default\)"
   (unless type
@@ -364,6 +364,7 @@ EXCEPTION must be the name of table as string or nil."
      (qz-line 0 1 "{")
      (qz-line 1 1 "public function __construct() {")
      (qz-line 2 1 "parent::__construct();")
+     (qz-line 2 1 (format "$this->load->model('%s_model');" table))
      (qz-line 1 2 "}")
      (qz-line 0 0 "}")))
    (t ;; global class wrapper
