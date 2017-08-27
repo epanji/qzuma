@@ -158,14 +158,14 @@
   (unless neol
     (setq neol 1))
   (let ((uploads (qz-ci-upload-exists fields)))
-    (when uploads
-      (concat
-       (qz-line 0 1 "")
-       (qz-line 0 1 (qz-ci-define-private-upload ntab neol))
-       (mapconcat
-        #'(lambda (type)
-            (qz-ci-define-function-upload type ntab neol))
-        uploads (qz-line 0 1 ""))))))
+    (if uploads
+        (concat
+         (qz-line 0 1 "")
+         (qz-line 0 1 (qz-ci-define-private-upload ntab neol))
+         (mapconcat
+          #'(lambda (type)
+              (qz-ci-define-function-upload type ntab neol))
+          uploads (qz-line 0 1 ""))) "")))
 
 ;; commands
 
