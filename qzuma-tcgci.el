@@ -196,7 +196,13 @@
        (qz-line (+ ntab 1) neol "}")
        (qz-line ntab neol "}")))
      ((string-equal name "remove")
-      (concat "controller->remove for update flag"))
+      (concat
+       (qz-line ntab 0 (format "$this->%s" table))
+       (qz-line 0 neol "_model->update($id, '0');")
+       (qz-line ntab 0 "$this->session->set_flashdata")
+       (qz-line 0 neol "('pesan', 'Data berhasil dihapus');")
+       (qz-line ntab 0 "redirect(base_url()")
+       (qz-line 0 neol (format ".'%s/');" (downcase controller)))))
      ((string-equal name "detail")
       (concat "controller->detail for read data detail"))
      )))
@@ -237,6 +243,7 @@
               (qz-tcgci-method fields "index" controller type "$page = 0")
               (qz-tcgci-method fields "add" controller type)
               (qz-tcgci-method fields "edit" controller type "$id")
+              (qz-tcgci-method fields "remove" controller "" "$id")
               ;; ok
               )
 		  (print "Selected region not well formatted")))
