@@ -204,8 +204,11 @@
        (qz-line ntab 0 "redirect(base_url()")
        (qz-line 0 neol (format ".'%s/');" (downcase controller)))))
      ((string-equal name "detail")
-      (concat "controller->detail for read data detail"))
-     )))
+      (concat
+       (qz-line ntab (+ neol 1) "$data = array();")
+       (qz-line ntab 0 (format "$data['%s'] = " table))
+       (qz-line 0 0 (format "$this->%s" table))
+       (qz-line 0 neol "_model->read($id, true);"))))))
 
 (defun qz-tcgci-upload-exists (fields &optional ntab neol)
   "Add upload function for the type if exists."
@@ -238,14 +241,14 @@
 		(if (qz-table-p fields)
 			(progn
               (qz-open-clear-buffer (format "%s.php" controller))
-              (insert (qz-ci-class-wrapper controller type (qz-table-name fields)))
+              (insert (qz-ci-class-wrapper controller type
+                                           (qz-table-name fields)))
               (qz-open-continue-buffer (concat controller ".php"))
               (qz-tcgci-method fields "index" controller type "$page = 0")
               (qz-tcgci-method fields "add" controller type)
               (qz-tcgci-method fields "edit" controller type "$id")
               (qz-tcgci-method fields "remove" controller "" "$id")
-              ;; ok
-              )
+              (qz-tcgci-method fields "detail" controller type "$id"))
 		  (print "Selected region not well formatted")))
 	(print "No region selected")))
 
