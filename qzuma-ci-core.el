@@ -365,7 +365,8 @@ EXCEPTION must be the name of table as string or nil."
      (qz-line 0 1 "{")
      (qz-line 1 1 "public function __construct() {")
      (qz-line 2 1 "parent::__construct();")
-     (qz-line 2 1 (format "$this->load->model('%s_model');" table))
+     (qz-line 2 0 "$this->load->model")
+     (qz-line 0 1 (format "('%s_model');" (qz-to-singular table)))
      (qz-line 1 2 "}")
      (qz-line 0 0 "}")))
    (t ;; global class wrapper
