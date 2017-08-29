@@ -58,7 +58,8 @@
     (setq ntab 0))
   (unless neol
     (setq neol 1))
-  (let ((table (qz-table-name fields)))
+  (let* ((table (qz-table-name fields))
+         (model (qz-to-singular table)))
     (cond
      ((string-equal name "create")
       (concat
@@ -151,7 +152,7 @@
        (qz-line (+ ntab 1) neol "$search = '';")
        (qz-line ntab neol "}")
        (qz-line ntab 0 (format "$data['%s'] = " table))
-       (qz-line 0 0 (format "$this->%s_model" table))
+       (qz-line 0 0 (format "$this->%s_model" model))
        (qz-line 0 0 "->read($search, false, $per_page, ")
        (qz-line 0 neol "$base_url, $page);")))
      ((string-equal name "add")
@@ -165,7 +166,7 @@
        (qz-line ntab neol "if ($this->input->post('btn_submit')) {")
        (qz-line (+ ntab 1) 0 "if ($this->form_validation->run() ")
        (qz-line 0 neol "!== FALSE) {")
-       (qz-line (+ ntab 2) 0 (format "$this->%s_model" table))
+       (qz-line (+ ntab 2) 0 (format "$this->%s_model" model))
        (qz-line 0 neol "->create();")
        (qz-line (+ ntab 2) 0 "$this->session->set_flashdata")
        (qz-line 0 neol "('pesan', 'Data berhasil disimpan');")
@@ -177,7 +178,7 @@
       (concat
        (qz-line ntab (+ neol 1) "$data = array();")
        (qz-line ntab 0 (format "$data['%s'] = " table))
-       (qz-line 0 0 (format "$this->%s" table))
+       (qz-line 0 0 (format "$this->%s" model))
        (qz-line 0 (+ neol 1) "_model->read($id, true);")
        (qz-line ntab 0 "$this->form_validation->")
        (qz-line 0 0 "set_error_delimiters('<br />")
@@ -187,7 +188,7 @@
        (qz-line ntab neol "if ($this->input->post('btn_submit')) {")
        (qz-line (+ ntab 1) 0 "if ($this->form_validation->run() ")
        (qz-line 0 neol "!== FALSE) {")
-       (qz-line (+ ntab 2) 0 (format "$this->%s_model" table))
+       (qz-line (+ ntab 2) 0 (format "$this->%s_model" model))
        (qz-line 0 neol "->update($id);")
        (qz-line (+ ntab 2) 0 "$this->session->set_flashdata")
        (qz-line 0 neol "('pesan', 'Data berhasil diperbarui');")
@@ -197,7 +198,7 @@
        (qz-line ntab neol "}")))
      ((string-equal name "remove")
       (concat
-       (qz-line ntab 0 (format "$this->%s" table))
+       (qz-line ntab 0 (format "$this->%s" model))
        (qz-line 0 neol "_model->update($id, '0');")
        (qz-line ntab 0 "$this->session->set_flashdata")
        (qz-line 0 neol "('pesan', 'Data berhasil dihapus');")
@@ -207,7 +208,7 @@
       (concat
        (qz-line ntab (+ neol 1) "$data = array();")
        (qz-line ntab 0 (format "$data['%s'] = " table))
-       (qz-line 0 0 (format "$this->%s" table))
+       (qz-line 0 0 (format "$this->%s" model))
        (qz-line 0 neol "_model->read($id, true);"))))))
 
 (defun qz-tcgci-upload-exists (fields &optional ntab neol)
