@@ -418,5 +418,23 @@ EXCEPTION must be the name of table as string or nil."
          (t nil)))
     fields)))
 
+
+
+(defun qz-ci-view-form-search (name)
+  "Form search for name as model name."
+  (concat
+   (qz-line 0 1 "<form name=\"form_search\" method=\"get\" action=\"\" >")
+   (qz-line 1 1 "<div class=\"input-group col-sm-4 col-sm-offset-8\">")
+   (qz-line 2 0 "<input class=\"form-control\" placeholder=\"Search\" ")
+   (qz-line 0 0 "type=\"text\" name=")
+   (qz-line 0 1 (format "\"%s_search\" value=\"\" />" name))
+   (qz-line 2 1 "<span class=\"input-group-btn\">")
+   (qz-line 3 0 "<button class=\"btn btn-default\" type=\"submit\">")
+   (qz-line 0 0 "<span class=\"glyphicon glyphicon-search\" ")
+   (qz-line 0 1 "aria-hidden=\"true\"></span></button>")
+   (qz-line 2 1 "</span>")
+   (qz-line 1 1 "</div>")
+   (qz-line 0 1 "</form>")))
+
 (provide 'qzuma-ci-core)
 ;;; qzuma-ci-core.el ends here
