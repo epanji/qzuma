@@ -91,9 +91,10 @@
               fields "")
            ""))) ""))
 
-(defun qz-ci-line-validation (field)
+(defun qz-ci-line-validation (field &optional commented)
   "Create one line validation from field."
-  (concat "$this->form_validation->set_rules"
+  (concat (if commented "#" "")
+          "$this->form_validation->set_rules"
           (format "('%s', '%s', 'required');"
                   (qz-form-field field)
                   (qz-trim-field field))))
@@ -112,7 +113,7 @@
                          (cdr (butlast (qz-localize-fields fields))))))
         (mapconcat
          #'(lambda (f)
-             (qz-line ntab neol (qz-ci-line-validation f)))
+             (qz-line ntab neol (qz-ci-line-validation f (qz-ci-file-p f))))
          newfields "")) ""))
 
 (defun qz-ci-query-select (field &optional table)
