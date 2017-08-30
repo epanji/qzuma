@@ -75,7 +75,7 @@
                            fields
                          (cdr (butlast
                                (qz-localize-fields
-                                fields (not exception))))))
+                                fields t)))))
             files)
         (concat
          (mapconcat
@@ -110,7 +110,9 @@
   (if (or (qz-table-p fields) exception)
       (let ((newfields (if exception
                            fields
-                         (cdr (butlast (qz-localize-fields fields))))))
+                         (cdr (butlast
+                               (qz-localize-fields
+                                fields t))))))
         (mapconcat
          #'(lambda (f)
              (qz-line ntab neol (qz-ci-line-validation f (qz-ci-file-p f))))
