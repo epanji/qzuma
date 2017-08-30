@@ -258,6 +258,20 @@ EXCEPTION must be the name of table as string or nil."
               qz-ci-audio
               qz-ci-video))
 
+(qz-define-field-type
+ "qz-ci" "textarea" ""
+
+ ;; english
+ "content$"
+ "description$"
+ "text$"
+
+ ;; indonesia
+ "isi$"
+ "konten$"
+ "deskripsi$"
+ "keterangan$")
+
 
 
 (defun qz-ci-define-private-upload (&optional ntab neol)
@@ -437,6 +451,48 @@ EXCEPTION must be the name of table as string or nil."
    (qz-line 2 1 "</span>")
    (qz-line 1 1 "</div>")
    (qz-line 0 1 "</form>")))
+
+(defun qz-ci-form-horizontal-item (name &optional ntab neol)
+  "Create bootstrap form horizontal."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (let ((input-type (cond ((qz-ci-file-p name) qz-ci-file-alias)
+                          ((qz-ci-textarea-p name) qz-ci-textarea-alias)
+                          (t "type=\"text\"")))
+        (input-class (cond ((qz-ci-file-p name) "btn btn-default")
+                           ((qz-ci-textarea-p name)
+                            "form-control ckeditor\" rows=\"10")
+                           (t "form-control")))
+        (input-tag (if (qz-ci-textarea-p name) "textarea" "input"))
+        (value-open (if (qz-ci-textarea-p name) "value=\"\">" "value=\""))
+        (value-close (if (qz-ci-textarea-p name) "</textarea>" "\" />")))
+    (concat
+   (qz-line ntab neol "<div class=\"form-group\">")
+   (qz-line (+ ntab 1) 0 "<label class=\"control-label col-sm-2\">")
+   (qz-line 0 0 (format "%s" (qz-upper-first (qz-trim-field name))))
+   (qz-line 0 neol "</label>")
+   (qz-line (+ ntab 1) neol "<div  class=\"col-sm-10\">")
+   (if (qz-identity-p name)
+       (concat
+        (qz-line (+ ntab 2) 0 "<?php echo form_dropdown")
+        (qz-line 0 0 (format "('%s', " (qz-form-field name)))
+        (qz-line 0 0 (format "$%sArray" (qz-table-name name)))
+        (qz-line 0 0 (format ", @$row->%s, " (qz-form-field name)))
+        (qz-line 0 neol (format "'class=\"%s\"');?>" input-class)))
+     (concat
+      (qz-line (+ ntab 2) 0 (format "<%s " input-tag))
+      (qz-line 0 0 (format "class=\"%s\" " input-class))
+      (qz-line 0 0 (format "%s " input-type))
+      (qz-line 0 0 (format "name=\"%s\" " (qz-form-field name)))
+      (qz-line 0 0 (format "%s<?php echo " value-open))
+      (qz-line 0 0 (format "@$row->%s;?>" (qz-form-field name)))
+      (qz-line 0 neol (format "%s" value-close))))
+   (qz-line (+ ntab 2) 0 "<?php echo form_error")
+   (qz-line 0 neol (format "('%s'); ?>" (qz-form-field name)))
+   (qz-line (+ ntab 1) neol "</div>")
+   (qz-line ntab neol "</div>"))))
 
 (provide 'qzuma-ci-core)
 ;;; qzuma-ci-core.el ends here
