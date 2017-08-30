@@ -107,7 +107,7 @@
         (t name)))
 
 (defun qz-prefix-field (name &optional separator exception)
-  "Remove '~s' '~es' in plural name and add SEPARATOR as prefix, 
+  "Remove '~s' '~es' in plural name and add SEPARATOR as prefix,
 only if the NAME is a key or EXCEPTION is true."
   (unless separator
     (setq separator "_"))
