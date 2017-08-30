@@ -556,7 +556,7 @@ EXCEPTION must be the name of table as string or nil."
                     fields
                     (not exception))))))
     (concat
-     (qz-line ntab neol "<th>No</th>")
+     (qz-line ntab neol "<th width=\"1%\">No</th>")
      (mapconcat
       #'(lambda (h)
           (qz-line
@@ -570,7 +570,7 @@ EXCEPTION must be the name of table as string or nil."
              (qz-upper-first
               (qz-form-field h ))))))
       headers "")
-     (qz-line ntab neol "<th colspan=\"3\">Aksi</th>"))))
+     (qz-line ntab neol "<th colspan=\"3\" width=\"30%\">Aksi</th>"))))
 
 (defun qz-ci-table-content (fields &optional ntab neol exception)
   "Create table content from fields."
