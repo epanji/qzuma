@@ -147,7 +147,7 @@
        (qz-line ntab neol "$per_page = 10;")
        (qz-line ntab 0 "$base_url = base_url()")
        (qz-line 0 neol (format ".'%s';" (downcase controller)))
-       (qz-line ntab 0 "if(! $search = $this->input->get")
+       (qz-line ntab 0 "if (! $search = $this->input->get")
        (qz-line 0 neol (format "('%s_search')) {" (downcase controller)))
        (qz-line (+ ntab 1) neol "$search = '';")
        (qz-line ntab neol "}")
