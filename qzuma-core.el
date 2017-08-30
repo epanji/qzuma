@@ -161,7 +161,7 @@ When PURE is true, exclude other foreign field from fields."
   (remq nil
         (mapcar
          #'(lambda (f)
-             (unless (string-match "[\._][gu]*id$" f) f))
+             (unless (qz-key-p f) f))
          fields)))
 
 (provide 'qzuma-core)
