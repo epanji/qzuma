@@ -177,7 +177,7 @@
      ((string-equal name "edit")
       (concat
        (qz-line ntab (+ neol 1) "$data = array();")
-       (qz-line ntab 0 (format "$data['%s'] = " table))
+       (qz-line ntab 0 (format "$data['%s'] = " model))
        (qz-line 0 0 (format "$this->%s" model))
        (qz-line 0 (+ neol 1) "_model->read($id, true);")
        (qz-line ntab 0 "$this->form_validation->")
