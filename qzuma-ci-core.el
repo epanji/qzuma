@@ -474,7 +474,7 @@ EXCEPTION must be the name of table as string or nil."
      (qz-line 0 0 (format "%s" (qz-upper-first (qz-trim-field name))))
      (qz-line 0 neol "</label>")
      (qz-line (+ ntab 1) neol "<div  class=\"col-sm-10\">")
-     (if (string-match "[\._][gu]*id$" name)
+     (if (qz-key-p name)
          (concat
           (qz-line (+ ntab 2) 0 "<?php echo form_dropdown")
           (qz-line 0 0 (format "('%s', " (qz-form-field name)))
@@ -538,6 +538,38 @@ EXCEPTION must be the name of table as string or nil."
      (qz-line (+ ntab 1) neol "</div>")
      (qz-line 0 1 "")
      (qz-line ntab neol "</form>"))))
+
+
+
+(defun qz-ci-table-header (fields &optional ntab neol exception)
+  "Create table header from fields."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (unless exception
+    (setq exception nil))
+  (let ((headers (butlast
+                  (qz-exclude-keys
+                   (qz-localize-fields
+                    fields
+                    (not exception))))))
+    (concat
+     (qz-line ntab neol "<th>No</th>")
+     (mapconcat
+      #'(lambda (h)
+          (qz-line
+           ntab
+           neol
+           (format
+            "<th>%s</th>"
+            (replace-regexp-in-string
+             "_"
+             " "
+             (qz-upper-first
+              (qz-form-field h ))))))
+      headers "")
+     (qz-line ntab neol "<th colspan=\"3\">Aksi</th>"))))
 
 (provide 'qzuma-ci-core)
 ;;; qzuma-ci-core.el ends here
