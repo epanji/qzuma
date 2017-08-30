@@ -599,5 +599,22 @@ EXCEPTION must be the name of table as string or nil."
               (qz-form-field c)))))
       contents ""))))
 
+(defun qz-ci-flash-message (&optional ntab neol name)
+  "Create condition to pop flashdata message."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (unless name
+    (setq name "pesan"))
+  (concat
+   (qz-line ntab 0 "<?php if ($this->session->flashdata")
+   (qz-line 0 neol (format "('%s')) { ?>" name))
+   (qz-line (+ ntab 1) 0 "<div class=\"alert alert-success\" ")
+   (qz-line 0 0 "role=\"alert\">")
+   (qz-line 0 0 "<?php echo $this->session->flashdata")
+   (qz-line 0 neol (format "('%s');?></div>" name))
+   (qz-line ntab neol "<?php } ?>")))
+
 (provide 'qzuma-ci-core)
 ;;; qzuma-ci-core.el ends here
