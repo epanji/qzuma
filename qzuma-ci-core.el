@@ -593,7 +593,7 @@ EXCEPTION must be the name of table as string or nil."
            ntab
            neol
            (format
-            "<td><?php echo $row->%s</td>"
+            "<td><?php echo $row->%s;?></td>"
             (if (string-equal table (qz-table-name c))
                 (qz-trim-field c)
               (qz-form-field c)))))
