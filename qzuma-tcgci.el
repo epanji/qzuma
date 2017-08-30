@@ -146,7 +146,7 @@
        (qz-line ntab neol "$data['no'] = $page + 1;")
        (qz-line ntab neol "$per_page = 10;")
        (qz-line ntab 0 "$base_url = base_url()")
-       (qz-line 0 neol (format ".'%s';" (downcase controller)))
+       (qz-line 0 neol (format ".'%s/index';" (downcase controller)))
        (qz-line ntab 0 "if (! $search = $this->input->get")
        (qz-line 0 neol (format "('%s_search')) {" (downcase controller)))
        (qz-line (+ ntab 1) neol "$search = '';")
@@ -209,7 +209,16 @@
        (qz-line ntab (+ neol 1) "$data = array();")
        (qz-line ntab 0 (format "$data['%s'] = " table))
        (qz-line 0 0 (format "$this->%s" model))
-       (qz-line 0 neol "_model->read($id, true);"))))))
+       (qz-line 0 neol "_model->read($id, true);")))
+     ((string-equal name "activate")
+      (concat
+       (qz-line ntab 0 (format "#$this->%s" model))
+       (qz-line 0 0 "_model->update($id, '2', '1'); ")
+       (qz-line 0 neol "// 1 => default, 2 => active")
+       (qz-line ntab 0 "#$this->session->set_flashdata")
+       (qz-line 0 neol "('pesan', 'Data berhasil diaktifkan');")
+       (qz-line ntab 0 "#redirect(base_url()")
+       (qz-line 0 neol (format ".'%s/');" (downcase controller))))))))
 
 (defun qz-tcgci-upload-exists (fields &optional ntab neol)
   "Add upload function for the type if exists."
@@ -249,7 +258,8 @@
               (qz-tcgci-method fields "add" controller type)
               (qz-tcgci-method fields "edit" controller type "$id")
               (qz-tcgci-method fields "remove" controller "" "$id")
-              (qz-tcgci-method fields "detail" controller type "$id"))
+              (qz-tcgci-method fields "detail" controller type "$id")
+              (qz-tcgci-method fields "activate" controller "" "$id"))
 		  (print "Selected region not well formatted")))
 	(print "No region selected")))
 
