@@ -571,5 +571,33 @@ EXCEPTION must be the name of table as string or nil."
       headers "")
      (qz-line ntab neol "<th colspan=\"3\">Aksi</th>"))))
 
+(defun qz-ci-table-content (fields &optional ntab neol exception)
+  "Create table content from fields."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (unless exception
+    (setq exception nil))
+  (let ((table (qz-table-name fields))
+        (contents (butlast
+                   (qz-exclude-keys
+                    (qz-localize-fields
+                     fields
+                     (not exception))))))
+    (concat
+     (qz-line ntab neol "<td><?php echo $no++; ?></td>")
+     (mapconcat
+      #'(lambda (c)
+          (qz-line
+           ntab
+           neol
+           (format
+            "<td><?php echo $row->%s</td>"
+            (if (string-equal table (qz-table-name c))
+                (qz-trim-field c)
+              (qz-form-field c)))))
+      contents ""))))
+
 (provide 'qzuma-ci-core)
 ;;; qzuma-ci-core.el ends here
