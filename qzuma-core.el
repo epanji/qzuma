@@ -74,6 +74,10 @@
   "Regex to identify identity."
   (integerp (string-match "[\.][gu]*id$" name)))
 
+(defun qz-key-p (name)
+  "Regex to identify field key."
+  (integerp (string-match "[\._][gu]*id$" name)))
+
 (defun qz-upper-first (name)
   "Capitalize only first character from NAME."
   (concat (capitalize (substring name 0 1))
