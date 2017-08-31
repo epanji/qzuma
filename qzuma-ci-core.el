@@ -439,7 +439,8 @@ EXCEPTION must be the name of table as string or nil."
 (defun qz-ci-view-form-search (name)
   "Form search for name as model name."
   (concat
-   (qz-line 0 1 "<form name=\"form_search\" method=\"get\" action=\"\" >")
+   (qz-line 0 0 "<form name=\"form_search\" method=\"get\" ")
+   (qz-line 0 1 "action=\"<?php echo $base_url;?>\" >")
    (qz-line 1 1 "<div class=\"input-group col-sm-4 col-sm-offset-8\">")
    (qz-line 2 0 "<input class=\"form-control\" placeholder=\"Search\" ")
    (qz-line 0 0 "type=\"text\" name=")

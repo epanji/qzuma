@@ -143,9 +143,9 @@
      ((string-equal name "index")
       (concat
        (qz-line ntab (+ neol 1) "$data = array();")
-       (qz-line ntab neol "$data['no'] = $page + 1;")
        (qz-line ntab neol "$per_page = 10;")
-       (qz-line ntab 0 "$base_url = base_url()")
+       (qz-line ntab neol "$data['no'] = $page + 1;")
+       (qz-line ntab 0 "$data['base_url'] = base_url()")
        (qz-line 0 neol (format ".'%s/index';" (downcase controller)))
        (qz-line ntab 0 "if (! $search = $this->input->get")
        (qz-line 0 neol (format "('%s_search')) {" (downcase controller)))
@@ -154,7 +154,7 @@
        (qz-line ntab 0 (format "$data['%s'] = " table))
        (qz-line 0 0 (format "$this->%s_model" model))
        (qz-line 0 0 "->read($search, false, $per_page, ")
-       (qz-line 0 neol "$base_url, $page);")))
+       (qz-line 0 neol "$data['base_url'], $page);")))
      ((string-equal name "add")
       (concat
        (qz-line ntab (+ neol 1) "$data = array();")
