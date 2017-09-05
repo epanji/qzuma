@@ -372,5 +372,75 @@
 		  (print "Selected region not well formatted")))
     (print "No region selected")))
 
+(defun qz-tcgci-create-view-add ()
+  "Create add view from fields in region."
+  (interactive)
+  (if (use-region-p)
+	  (let ((fields (qz-list-from-region
+                     (region-beginning)
+                     (region-end)))
+			(controller (downcase (read-from-minibuffer
+                                   "Controller name: "))))
+		(if (qz-table-p fields)
+			(progn
+              (qz-open-clear-buffer (format "%s_add.php" controller))
+              (when (fboundp 'web-mode) (web-mode))
+              (insert
+               (qz-line 0 2 "<?php include(\"v_dashboard_header.php\") ?>")
+               (qz-ci-flash-message 0 1 "pesan")
+               (qz-line 0 1 "")
+               (qz-line 0 1 "<?php $btn_value = \"Tambah\"?>")
+               (qz-line 0 0 "<?php include(")
+               (qz-line 0 0 (format "\"%s" controller))
+               (qz-line 0 2 "_form.php\") ?>")
+               (qz-line 0 0 "<?php include(")
+               (qz-line 0 1 "\"v_dashboard_footer.php\") ?>")))
+		  (print "Selected region not well formatted")))
+    (print "No region selected")))
+
+(defun qz-tcgci-create-view-edit ()
+  "Create edit view from fields in region."
+  (interactive)
+  (if (use-region-p)
+	  (let ((fields (qz-list-from-region
+                     (region-beginning)
+                     (region-end)))
+			(controller (downcase (read-from-minibuffer
+                                   "Controller name: "))))
+		(if (qz-table-p fields)
+			(progn
+              (qz-open-clear-buffer (format "%s_edit.php" controller))
+              (when (fboundp 'web-mode) (web-mode))
+              (insert
+               (qz-line 0 2 "<?php include(\"v_dashboard_header.php\") ?>")
+               (qz-ci-flash-message 0 1 "pesan")
+               (qz-line 0 1 "")
+               (qz-line 0 1 "<?php $btn_value = \"Perbarui\"?>")
+               (qz-line 0 0 "<?php include(")
+               (qz-line 0 0 (format "\"%s" controller))
+               (qz-line 0 2 "_form.php\") ?>")
+               (qz-line 0 0 "<?php include(")
+               (qz-line 0 1 "\"v_dashboard_footer.php\") ?>")))
+		  (print "Selected region not well formatted")))
+    (print "No region selected")))
+
+(defun qz-tcgci-create-form ()
+  "Create form to be used in add and edit."
+  (interactive)
+  (if (use-region-p)
+	  (let ((fields (qz-list-from-region
+                     (region-beginning)
+                     (region-end)))
+			(controller (downcase (read-from-minibuffer
+                                   "Controller name: "))))
+		(if (qz-table-p fields)
+			(progn
+              (qz-open-clear-buffer (format "%s_form.php" controller))
+              (when (fboundp 'web-mode) (web-mode))
+              (insert
+               (qz-ci-form-horizontal fields 0 1)))
+		  (print "Selected region not well formatted")))
+    (print "No region selected")))
+
 (provide 'qzuma-tcgci)
 ;;; qzuma-tcgci.el ends here
