@@ -480,9 +480,8 @@ EXCEPTION must be the name of table as string or nil."
          (concat
           (qz-line (+ ntab 2) 0 "<?php echo form_dropdown")
           (qz-line 0 0 (format "('%s', " (qz-form-field name)))
-          (qz-line 0 0 (format "$%sArray" (qz-to-singular
-                                           (qz-table-name name))))
-          (qz-line 0 0 (format ", @$row->%s, " (qz-form-field name)))
+          (qz-line 0 0 (format "$%ss" (qz-trim-field name)))
+          (qz-line 0 0 (format ", @$row->%s, " (qz-trim-field name)))
           (qz-line 0 neol (format "'class=\"%s\"');?>" input-class)))
        (concat
         (qz-line (+ ntab 2) 0 (format "<%s " input-tag))
@@ -490,7 +489,7 @@ EXCEPTION must be the name of table as string or nil."
         (qz-line 0 0 (format "%s " input-type))
         (qz-line 0 0 (format "name=\"%s\" " (qz-form-field name)))
         (qz-line 0 0 (format "%s<?php echo " value-open))
-        (qz-line 0 0 (format "@$row->%s;?>" (qz-form-field name)))
+        (qz-line 0 0 (format "@$row->%s;?>" (qz-trim-field name)))
         (qz-line 0 neol (format "%s" value-close))))
      (qz-line (+ ntab 2) 0 "<?php echo form_error")
      (qz-line 0 neol (format "('%s'); ?>" (qz-form-field name)))
