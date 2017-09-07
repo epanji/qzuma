@@ -434,6 +434,40 @@ EXCEPTION must be the name of table as string or nil."
          (t nil)))
     fields)))
 
+(defun qz-ci-dropdown-data (fields &optional ntab neol exception)
+  "Create dropdown data if needed.
+EXCEPTION must be the name of table as string or nil."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (unless exception
+    (setq exception nil))
+  (let ((table (or exception
+                   (qz-table-name fields)))
+        (foreign-keys (remq nil
+                            (mapcar #'(lambda (f)
+                                        (when (qz-key-p f) f))
+                                    (if exception
+                                        fields
+                                      (cdr (butlast fields))))))
+        (name (car (qz-exclude-keys fields))))
+    (if foreign-keys
+        (mapconcat
+         #'(lambda (fk)
+             (concat
+              (qz-line ntab 0 "foreach ($this->")
+              (qz-line
+               0 0
+               (format "%s" (qz-to-singular (qz-table-name fk))))
+              (qz-line 0 0 "_model->read()->")
+              (qz-line 0 neol "result() as $row) {")
+              (qz-line (+ ntab 1) 0 "$data[")
+              (qz-line 0 0 (format "'%ss'][$row->" (qz-form-field fk)))
+              (qz-line 0 0 (format "%s] = $row->" (qz-trim-field fk)))
+              (qz-line 0 neol (format "%s;" (qz-trim-field name)))
+              (qz-line ntab neol "}"))) foreign-keys "") "")))
+
 
 
 (defun qz-ci-view-form-search (name)
