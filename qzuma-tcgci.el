@@ -40,7 +40,7 @@
           (setq parameters ""))
         (qz-open-continue-buffer (concat class ".php"))
         (when (equal 1 (point-at-bol))
-          (insert (qz-ci-class-wrapper name type (qz-table-name fields)))
+          (insert (qz-ci-class-wrapper name type fields))
           (forward-line -1))
         (when (fboundp 'web-mode) (web-mode))
         (insert
@@ -73,6 +73,7 @@
        (qz-line ntab neol "return $this->db->insert_id();")))
      ((string-equal name "read")
       (concat
+       (qz-line ntab neol "$this->db->flush_cache();")
        (qz-line ntab neol "if ($is_id) {")
        (qz-line (+ ntab 1) 0 "$this->db->where")
        (qz-line 0 neol (format "('%s.flag', 1);" table))
@@ -85,7 +86,6 @@
        (qz-line 0 (+ neol 1) "= true;")
        (qz-ci-query-select-multi-line fields (+ ntab 1) neol)
        (qz-line 0 1 "")
-       (qz-line (+ ntab 1) neol "$this->db->flush_cache();")
        (qz-line (+ ntab 1) neol "$this->db->start_cache();")
        (qz-line (+ ntab 1) neol "$this->db->select($select);")
        (qz-ci-data-join fields (+ ntab 1) neol)
@@ -253,8 +253,7 @@
 		(if (qz-table-p fields)
 			(progn
               (qz-open-clear-buffer (format "%s.php" controller))
-              (insert (qz-ci-class-wrapper controller type
-                                           (qz-table-name fields)))
+              (insert (qz-ci-class-wrapper controller type fields))
               (qz-open-continue-buffer (concat controller ".php"))
               (qz-tcgci-method fields "index" controller type "$page = 0")
               (qz-tcgci-method fields "add" controller type)
