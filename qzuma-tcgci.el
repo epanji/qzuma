@@ -298,9 +298,9 @@
 		  (print "Selected region not well formatted")))
 	(print "No region selected")))
 
-(defun qz-tcgci-create-view-index ()
+(defun qz-tcgci-create-view-index (&optional exception)
   "Create index view from fields in region."
-  (interactive)
+  (interactive (list current-prefix-arg))
   (if (use-region-p)
 	  (let ((fields (qz-list-from-region
                      (region-beginning)
@@ -320,7 +320,7 @@
                (qz-line 0 1 "<table class=\"table table-striped\">")
                (qz-line 1 1 "<thead>")
                (qz-line 2 1 "<tr>")
-               (qz-ci-table-header fields 3 1)
+               (qz-ci-table-header fields 3 1 exception)
                (qz-line 2 1 "</tr>")
                (qz-line 1 1 "</thead>")
                (qz-line 1 1 "<tbody>")
@@ -330,7 +330,7 @@
                (qz-line 0 0 (format "$%s" (qz-table-name fields)))
                (qz-line 0 1 "->result() as $row) { ?>")
                (qz-line 4 1 "<tr>")
-               (qz-ci-table-content fields 5 1)
+               (qz-ci-table-content fields 5 1 exception)
                (qz-line 5 0 "<td><a href=\"<?php echo base_url();?>")
                (qz-line 0 0 (format "%s" controller))
                (qz-line 0 0 "/edit/<?php echo $row->")
@@ -426,8 +426,8 @@
 		  (print "Selected region not well formatted")))
     (print "No region selected")))
 
-(defun qz-tcgci-create-form ()
-  "Create form to be used in add and edit."
+(defun qz-tcgci-create-view-form ()
+  "Create view form to be used in add and edit."
   (interactive)
   (if (use-region-p)
 	  (let ((fields (qz-list-from-region
