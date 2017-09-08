@@ -209,7 +209,7 @@
      ((string-equal name "detail")
       (concat
        (qz-line ntab (+ neol 1) "$data = array();")
-       (qz-line ntab 0 (format "$data['%s'] = " table))
+       (qz-line ntab 0 (format "$data['%s'] = " model))
        (qz-line 0 0 (format "$this->%s" model))
        (qz-line 0 neol "_model->read($id, true);")))
      ((string-equal name "activate")
@@ -440,6 +440,28 @@
               (when (fboundp 'web-mode) (web-mode))
               (insert
                (qz-ci-form-horizontal fields 0 1)))
+		  (print "Selected region not well formatted")))
+    (print "No region selected")))
+
+(defun qz-tcgci-create-view-detail ()
+  "Create detail view from fields in region."
+  (interactive)
+  (if (use-region-p)
+	  (let ((fields (qz-list-from-region
+                     (region-beginning)
+                     (region-end)))
+			(controller (downcase (read-from-minibuffer
+                                   "Controller name: "))))
+		(if (qz-table-p fields)
+			(progn
+              (qz-open-clear-buffer (format "%s_detail.php" controller))
+              (when (fboundp 'web-mode) (web-mode))
+              (insert
+               (qz-line 0 2 "<?php include(\"v_dashboard_header.php\") ?>")
+               (qz-ci-table-rows fields 0 1)
+               (qz-line 0 1 "")
+               (qz-line 0 0 "<?php include(")
+               (qz-line 0 1 "\"v_dashboard_footer.php\") ?>")))
 		  (print "Selected region not well formatted")))
     (print "No region selected")))
 
