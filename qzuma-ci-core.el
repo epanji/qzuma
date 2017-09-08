@@ -711,6 +711,28 @@ EXCEPTION must be the name of table as string or nil."
       (qz-line 0 neol (format "%s;?></td>" (qz-trim-field field))))))
    (qz-line ntab neol "</tr>")))
 
+(defun qz-ci-table-rows (fields &optional ntab neol)
+  "Create full table with rows data."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (let* ((table (qz-table-name fields))
+         (model (qz-to-singular table))
+         (rows (mapcar
+               #'(lambda (f)
+                   (if (string-equal table (qz-table-name f))
+                       f (format "%s.%s" table (qz-form-field f))))
+               (qz-exclude-keys (butlast fields)))))
+    (concat
+     (qz-line ntab (+ neol 1) (format "<?php $row = $%s->row();?>" model))
+     (qz-line ntab (+ neol 1) "<table class=\"table no-border\">")
+     (mapconcat
+      #'(lambda (r)
+          (qz-ci-table-row r ntab neol)) rows (qz-line 0 1 ""))
+     (qz-line 0 1 "")
+     (qz-line ntab neol "</table>"))))
+
 (defun qz-ci-flash-message (&optional ntab neol name)
   "Create condition to pop flashdata message."
   (unless ntab
