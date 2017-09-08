@@ -646,6 +646,71 @@ EXCEPTION must be the name of table as string or nil."
               (qz-form-field c)))))
       contents ""))))
 
+(defun qz-ci-table-row (field &optional ntab neol)
+  "Create table row from field."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (concat
+   (qz-line ntab neol "<tr>")
+   (qz-line
+    (+ ntab 1) neol
+    (format "<td>%s</td>"
+            (replace-regexp-in-string
+             "_" " "
+             (qz-upper-first (qz-trim-field field)))))
+   (qz-line (+ ntab 1) neol "<td width=\"10\">:</td>")
+   (cond
+    ((qz-ci-picture-p field)
+     (concat
+      (qz-line (+ ntab 1) 0 "<td><img width=\"300px\" ")
+      (qz-line 0 0 "src=\"<?php echo base_url();?>")
+      (qz-line 0 0 "uploads/<?php echo $row->")
+      (qz-line 0 neol (format "%s;?>\" /></td>" (qz-trim-field field)))))
+    ((qz-ci-audio-p field)
+     (concat
+      (qz-line (+ ntab 1) neol "<td>")
+      (qz-line (+ ntab 2) neol "<audio controls>")
+      (qz-line (+ ntab 3) 0 "<source src=\"<?php echo base_url();?>")
+      (qz-line 0 0 "uploads/<?php echo $row->")
+      (qz-line 0 0 (format "%s" (qz-trim-field field)))
+      (qz-line 0 neol ";?>\" type=\"audio/ogg\">")
+      (qz-line (+ ntab 3) 0 "<source src=\"<?php echo base_url();?>")
+      (qz-line 0 0 "uploads/<?php echo $row->")
+      (qz-line 0 0 (format "%s" (qz-trim-field field)))
+      (qz-line 0 neol ";?>\" type=\"audio/mpeg\">")
+      (qz-line (+ ntab 3) 0 "<source src=\"<?php echo base_url();?>")
+      (qz-line 0 0 "uploads/<?php echo $row->")
+      (qz-line 0 0 (format "%s" (qz-trim-field field)))
+      (qz-line 0 neol ";?>\" type=\"audio/mp4\">")
+      (qz-line (+ ntab 3) 0 "Your browser does not ")
+      (qz-line 0 neol "support the audio element.")
+      (qz-line (+ ntab 2) neol "</audio>")
+      (qz-line (+ ntab 1) neol "</td>")))
+    ((qz-ci-video-p field)
+     (concat
+      (qz-line (+ ntab 1) neol "<td>")
+      (qz-line (+ ntab 2) 0 "<video width=\"320\" ")
+      (qz-line 0 neol "height=\"240\" controls>")
+      (qz-line (+ ntab 3) 0 "<source src=\"<?php echo base_url();?>")
+      (qz-line 0 0 "uploads/<?php echo $row->")
+      (qz-line 0 0 (format "%s" (qz-trim-field field)))
+      (qz-line 0 neol ";?>\" type=\"video/mp4\">")
+      (qz-line (+ ntab 3) 0 "<source src=\"<?php echo base_url();?>")
+      (qz-line 0 0 "uploads/<?php echo $row->")
+      (qz-line 0 0 (format "%s" (qz-trim-field field)))
+      (qz-line 0 neol ";?>\" type=\"video/ogg\">")
+      (qz-line (+ ntab 3) 0 "Your browser does not ")
+      (qz-line 0 neol "support the video tag.")
+      (qz-line (+ ntab 2) neol "</video>")
+      (qz-line (+ ntab 1) neol "</td>")))
+    (t
+     (concat
+      (qz-line (+ ntab 1) 0 "<td><?php echo $row->")
+      (qz-line 0 neol (format "%s;?></td>" (qz-trim-field field))))))
+   (qz-line ntab neol "</tr>")))
+
 (defun qz-ci-flash-message (&optional ntab neol name)
   "Create condition to pop flashdata message."
   (unless ntab
