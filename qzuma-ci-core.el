@@ -448,16 +448,14 @@ EXCEPTION must be the name of table as string or nil."
 
 (defun qz-ci-dropdown-data (fields &optional ntab neol exception)
   "Create dropdown data if needed.
-EXCEPTION must be the name of table as string or nil."
+EXCEPTION could be t if first field want to be included."
   (unless ntab
     (setq ntab 0))
   (unless neol
     (setq neol 1))
   (unless exception
     (setq exception nil))
-  (let ((table (or exception
-                   (qz-table-name fields)))
-        (foreign-keys (remq nil
+  (let ((foreign-keys (remq nil
                             (mapcar #'(lambda (f)
                                         (when (qz-key-p f) f))
                                     (if exception
