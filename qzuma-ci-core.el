@@ -446,13 +446,16 @@ EXCEPTION must be the name of table as string or nil."
          (t nil)))
     fields)))
 
-(defun qz-ci-dropdown-data (fields &optional ntab neol exception)
+(defun qz-ci-dropdown-data (fields &optional ntab neol default exception)
   "Create dropdown data if needed.
+DEFAULT is string represent first dropdown list.
 EXCEPTION could be t if first field want to be included."
   (unless ntab
     (setq ntab 0))
   (unless neol
     (setq neol 1))
+  (unless default
+    (setq default nil))
   (unless exception
     (setq exception nil))
   (let ((foreign-keys (remq nil
@@ -466,6 +469,11 @@ EXCEPTION could be t if first field want to be included."
         (mapconcat
          #'(lambda (fk)
              (concat
+              (when default
+                (concat
+                 (qz-line ntab 0 "$data[")
+                 (qz-line 0 0 (format "'%ss'" (qz-form-field fk)))
+                 (qz-line 0 neol (format "][''] = '%s';" default))))
               (qz-line ntab 0 "foreach ($this->")
               (qz-line
                0 0
