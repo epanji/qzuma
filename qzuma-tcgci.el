@@ -175,7 +175,7 @@
        (qz-line 0 neol (format ".'%s/');" (downcase controller)))
        (qz-line (+ ntab 1) neol "}")
        (qz-line ntab neol "}")
-       (qz-ci-dropdown-data fields ntab neol)))
+       (qz-ci-dropdown-data fields ntab neol "-- Pilih --")))
      ((string-equal name "edit")
       (concat
        (qz-line ntab (+ neol 1) "$data = array();")
