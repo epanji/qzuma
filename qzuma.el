@@ -3,9 +3,9 @@
 ;; Copyright (C) 2017  Panji Kusuma
 
 ;; Author: Panji Kusuma <epanji@gmail.com>
-;; Version: 0.0.1
+;; Version: 0.0.2
 ;; Created: 13 August 2017
-;; Keywords: convenience, tool, extensions
+;; Keywords: convenience, qzuma
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
