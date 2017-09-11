@@ -25,7 +25,7 @@
 
 ;;; Code:
 
-(require 'qzuma-core)
+(require 'qzuma-ci-core)
 
 (defun qz-tcgciws-controller-for-web-service (name)
   "Create controller for web service"
@@ -61,10 +61,12 @@
          ;; content get / set or if-get
          (qz-tcgciws-function-contents fields 2)
 
-         (qz-line 0 1 "")
-         (qz-line 2 1 "header('Content-Type: application/json');")
-         (qz-line 2 1 "echo json_encode($data);")
-         (qz-line 1 0 "}")))
+         (qz-ci-method-footer "service")
+         ;; (qz-line 0 1 "")
+         ;; (qz-line 2 1 "header('Content-Type: application/json');")
+         ;; (qz-line 2 1 "echo json_encode($data);")
+         (qz-line 1 0 "}")
+         ))
     (print "Selected region not well formatted")))
 
 (defun qz-tcgciws-function-contents (fields &optional ntab neol)
@@ -72,7 +74,7 @@
   (unless ntab
     (setq ntab 0))
   (unless neol
-    (setq neol 0))
+    (setq neol 1))
   (let* ((choise '(("get" . "get")
                    ("set" . "set")
                    ("if-get" . "if-get")))
@@ -97,48 +99,47 @@
   (unless ntab
     (setq ntab 0))
   (unless neol
-    (setq neol 0))
+    (setq neol 1))
   (concat
-   (qz-tcgciws-get-content
-    (butlast (qz-localize-fields fields)) ntab neol)
+   (qz-ci-query-select-multi-line fields ntab neol)
    (qz-line 0 1 "")
    (qz-tcgciws-get-query-content fields ntab neol)))
 
-(defun qz-tcgciws-get-content (fields &optional ntab neol)
-  "Select option to get."
-  (unless ntab
-    (setq ntab 0))
-  (unless neol
-    (setq neol 0))
-  (let ((one (car fields))
-        (body (cdr fields))
-        (container ""))
-    (setq
-     container
-     (qz-line ntab 1 (format "$select  = \"%s, \";" one)))
-    (when (> (length body) 1)
-      (mapc
-       (lambda (field)
-         (setq
-          container
-          (concat
-           container
-           (qz-line ntab 1 (format "$select .= \"%s, \";" field)))))
-       (butlast body)))
-    (concat
-     container
-     (qz-line ntab 1 (format "$select .= \"%s \";" (car (reverse body)))))))
+;; (defun qz-tcgciws-get-content (fields &optional ntab neol)
+;;   "Select option to get."
+;;   (unless ntab
+;;     (setq ntab 0))
+;;   (unless neol
+;;     (setq neol 1))
+;;   (let ((one (car fields))
+;;         (body (cdr fields))
+;;         (container ""))
+;;     (setq
+;;      container
+;;      (qz-line ntab 1 (format "$select  = \"%s, \";" one)))
+;;     (when (> (length body) 1)
+;;       (mapc
+;;        (lambda (field)
+;;          (setq
+;;           container
+;;           (concat
+;;            container
+;;            (qz-line ntab 1 (format "$select .= \"%s, \";" field)))))
+;;        (butlast body)))
+;;     (concat
+;;      container
+;;      (qz-line ntab 1 (format "$select .= \"%s \";" (car (reverse body)))))))
 
-(defun qz-tcgciws-get-join-fields (fields)
-  "Filter fields for join."
-  (let ((names (rest (butlast fields))))
-    (delq
-     nil
-     (mapcar
-      (lambda (field)
-        (when (qz-identity-p field)
-          field))
-      names))))
+;; (defun qz-tcgciws-get-join-fields (fields)
+;;   "Filter fields for join."
+;;   (let ((names (rest (butlast fields))))
+;;     (delq
+;;      nil
+;;      (mapcar
+;;       (lambda (field)
+;;         (when (qz-identity-p field)
+;;           field))
+;;       names))))
 
 (defun qz-tcgciws-get-filtered-fields (fields &optional string)
   "Get fields after filtered."
@@ -160,26 +161,28 @@
   (unless ntab
     (setq ntab 0))
   (unless neol
-    (setq neol 0))
+    (setq neol 1))
   (let ((table (qz-table-name fields))
         (flag (car (reverse fields)))
-        (joins (qz-tcgciws-get-join-fields fields)))
+        ;; (joins (qz-tcgciws-get-join-fields fields))
+        )
     (concat
      (qz-line ntab 1 "$this->db->select($select);")
-     (when joins
-       (let ((container ""))
-         (mapc
-          (lambda (id)
-            (setq
-             container
-             (concat
-              container
-              (qz-line ntab 0 "$this->db->join(")
-              (qz-line 0 0 (format "'%s', " (qz-table-name id)))
-              (qz-line 0 0 (format "'%s = " id))
-              (qz-line 0 1 (format "%s');" (qz-join-field table id))))))
-          joins)
-         container))
+     (qz-ci-data-join fields ntab neol)
+     ;; (when joins
+     ;;   (let ((container ""))
+     ;;     (mapc
+     ;;      (lambda (id)
+     ;;        (setq
+     ;;         container
+     ;;         (concat
+     ;;          container
+     ;;          (qz-line ntab 0 "$this->db->join(")
+     ;;          (qz-line 0 0 (format "'%s', " (qz-table-name id)))
+     ;;          (qz-line 0 0 (format "'%s = " id))
+     ;;          (qz-line 0 1 (format "%s');" (qz-join-field table id))))))
+     ;;      joins)
+     ;;     container))
      (qz-line ntab 1 (format "$this->db->where('%s', '1');" flag))
      (when wheres
        (let ((container ""))
@@ -208,15 +211,13 @@
   (unless ntab
     (setq ntab 0))
   (unless neol
-    (setq neol 0))
+    (setq neol 1))
   (concat
-   (qz-tcgciws-fields-validation
-    (cdr (butlast (qz-localize-fields fields t))) ntab neol)
+   (qz-ci-data-validation fields ntab neol)
    (qz-line 0 1 "")
    (qz-tcgciws-if-post-open
     (cdr (butlast (qz-localize-fields fields))) ntab neol)
-   (qz-tcgciws-if-post-content
-    (butlast (qz-localize-fields fields t)) (+ ntab 2) neol)
+   (qz-ci-data-post fields (+ ntab 2) neol)
    (qz-line 0 1 "")
    (qz-tcgciws-if-post-insert-update
     (qz-localize-fields fields) (+ ntab 2) neol)
@@ -228,16 +229,15 @@
   (unless ntab
     (setq ntab 0))
   (unless neol
-    (setq neol 0))
+    (setq neol 1))
   (let ((valids (qz-tcgciws-get-filtered-fields
                  (qz-localize-fields fields) "validations")))
     (concat
-     (qz-tcgciws-fields-validation valids ntab neol)
+     (qz-ci-data-validation valids ntab neol t)
      (qz-line 0 1 "")
      (qz-tcgciws-if-post-open
       (butlast (qz-localize-fields fields)) ntab neol)
-     (qz-tcgciws-get-content
-      (butlast (qz-localize-fields fields)) (+ ntab 2) neol)
+     (qz-ci-query-select-multi-line fields (+ ntab 2) neol)
      (qz-line 0 1 "")
      (qz-tcgciws-get-query-content
       fields (+ ntab 2) neol
@@ -250,7 +250,7 @@
   (unless ntab
     (setq ntab 0))
   (unless neol
-    (setq neol 0))
+    (setq neol 1))
   (let ((table (qz-table-name fields))
         (field (car fields)))
     (concat
@@ -272,7 +272,7 @@
   (unless ntab
     (setq ntab 0))
   (unless neol
-    (setq neol 0))
+    (setq neol 1))
   (let* ((choice fields)
          (choosen (completing-read
                    "Condition field: "   ; prompt
@@ -290,65 +290,64 @@
      (qz-line 0 1 "->run() !== FALSE) {")
      (qz-line 0 neol ""))))
 
-(defun qz-tcgciws-if-post-content (fields &optional ntab neol)
-  "Get data from input post."
-  (unless ntab
-    (setq ntab 0))
-  (unless neol
-    (setq neol 0))
-  (let ((posts "")
-        (table (qz-table-name fields)))
-    (mapc
-     (lambda (field)
-       (setq
-        posts
-        (concat
-         posts
-         (qz-line ntab 0 (format "$data_%s" table))
-         (qz-line 0 0 (format "['%s'] = " (qz-trim-field field)))
-         (qz-line 0 0 "$this->input->post(")
-         (qz-line 0 1 (format "'%s');" (qz-form-field field))))))
-     (cdr fields))
-    (qz-line 0 neol posts)))
+;; (defun qz-tcgciws-if-post-content (fields &optional ntab neol)
+;;   "Get data from input post."
+;;   (unless ntab
+;;     (setq ntab 0))
+;;   (unless neol
+;;     (setq neol 1))
+;;   (let ((posts "")
+;;         (table (qz-table-name fields)))
+;;     (mapc
+;;      (lambda (field)
+;;        (setq
+;;         posts
+;;         (concat
+;;          posts
+;;          (qz-line ntab 0 (format "$data_%s" table))
+;;          (qz-line 0 0 (format "['%s'] = " (qz-trim-field field)))
+;;          (qz-line 0 0 "$this->input->post(")
+;;          (qz-line 0 1 (format "'%s');" (qz-form-field field))))))
+;;      (cdr fields))
+;;     (qz-line 0 neol posts)))
 
 (defun qz-tcgciws-if-post-close (&optional ntab neol result)
   "Close condition content."
   (unless ntab
     (setq ntab 0))
   (unless neol
-    (setq neol 0))
+    (setq neol 1))
   (concat
    (when result
      (qz-line (+ ntab 2) 1 "$data['result'] = 'true';"))
    (qz-line (+ ntab 1) 1 "} else {")
    (qz-line (+ ntab 2) 1 "$data['data'] = \"Gagal validasi\";")
    (qz-line (+ ntab 1) 1 "}")
-   (qz-line ntab 1 "}")
-   (qz-line 0 neol "")))
+   (qz-line ntab neol "}")))
 
-(defun qz-tcgciws-fields-validation (fields &optional ntab neol)
-  "Get string validation."
-  (unless ntab
-    (setq ntab 0))
-  (unless neol
-    (setq neol 0))
-  (let ((validations ""))
-    (unless fields
-      (setq
-       validations
-       (qz-line ntab 1 "// need validation.")))
-    (mapc
-     (lambda (field)
-       (setq
-        validations
-        (concat
-         validations
-         (qz-line ntab 0 "$this->form_validation->set_rules(")
-         (qz-line 0 0 (format "'%s', " (qz-form-field field)))
-         (qz-line 0 0 (format "'%s', " (qz-trim-field field)))
-         (qz-line 0 1 "'required');"))))
-     fields)
-    (qz-line 0 neol validations)))
+;; (defun qz-tcgciws-fields-validation (fields &optional ntab neol)
+;;   "Get string validation."
+;;   (unless ntab
+;;     (setq ntab 0))
+;;   (unless neol
+;;     (setq neol 1))
+;;   (let ((validations ""))
+;;     (unless fields
+;;       (setq
+;;        validations
+;;        (qz-line ntab 1 "// need validation.")))
+;;     (mapc
+;;      (lambda (field)
+;;        (setq
+;;         validations
+;;         (concat
+;;          validations
+;;          (qz-line ntab 0 "$this->form_validation->set_rules(")
+;;          (qz-line 0 0 (format "'%s', " (qz-form-field field)))
+;;          (qz-line 0 0 (format "'%s', " (qz-trim-field field)))
+;;          (qz-line 0 1 "'required');"))))
+;;      fields)
+;;     (qz-line 0 neol validations)))
 
 ;;; commands
 
