@@ -37,6 +37,7 @@
    (qz-line 0 1 "{")
    (qz-line 1 1 "public function __construct() {")
    (qz-line 2 1 "parent::__construct();")
+   (qz-line 2 1 "$this->load->library('form_validation');")
    (qz-line 1 2 "}")
    (qz-line 0 0 "}")))
 
@@ -61,8 +62,7 @@
          (qz-tcgciws-function-contents fields 2)
 
          (qz-ci-method-footer "service")
-         (qz-line 1 0 "}")
-         ))
+         (qz-line 1 0 "}")))
     (print "Selected region not well formatted")))
 
 (defun qz-tcgciws-function-contents (fields &optional ntab neol)
@@ -101,23 +101,8 @@
    (qz-line 0 1 "")
    (qz-tcgciws-get-query-content fields ntab neol)))
 
-(defun qz-tcgciws-get-filtered-fields (fields &optional string)
-  "Get fields after filtered."
-  (unless string
-    (setq string "fields"))
-  (completing-read-multiple
-   (concat
-    "Optional " string " with comma (nil): ") ; prompt
-   (butlast fields)                           ; collection
-   nil                                        ; predicate
-   t                                          ; require-match
-   nil                                        ; initial-input
-   nil                                        ; hist
-   nil                                        ; def
-   ))
-
 (defun qz-tcgciws-get-query-content (fields &optional ntab neol wheres)
-  "Query to get data"
+  "Query to get data."
   (unless ntab
     (setq ntab 0))
   (unless neol
@@ -128,8 +113,7 @@
      (qz-line ntab 1 "$this->db->select($select);")
      (qz-ci-data-join fields ntab neol)
      (qz-line ntab 1 (format "$this->db->where('%s', '1');" flag))
-     (when wheres
-       (qz-ci-data-where wheres ntab neol t))
+     (when wheres (qz-ci-data-where wheres ntab neol t))
      (qz-line ntab 0 (format "$q_%s = $this->" table))
      (qz-line 0 1 (format "db->get('%s');" table))
      (qz-line ntab 1 (format "if ($q_%s->num_rows() > 0) {" table))
@@ -144,17 +128,16 @@
     (setq ntab 0))
   (unless neol
     (setq neol 1))
-  (concat
-   (qz-ci-data-validation fields ntab neol)
-   (qz-line 0 1 "")
-   (qz-tcgciws-if-post-open
-    (cdr (butlast (qz-localize-fields fields))) ntab neol)
-   (qz-ci-data-post fields (+ ntab 2) neol)
-   (qz-line 0 1 "")
-   (qz-tcgciws-if-post-insert-update
-    (qz-localize-fields fields) (+ ntab 2) neol)
-   (qz-line (+ ntab 2) 1 "$data['data'] = \"Sukses\";")
-   (qz-tcgciws-if-post-close ntab neol t)))
+  (let ((locals (qz-localize-fields fields)))
+    (concat
+     (qz-ci-data-validation fields ntab neol)
+     (qz-line 0 1 "")
+     (qz-tcgciws-if-post-open (cdr (butlast locals)) ntab neol)
+     (qz-ci-data-post fields (+ ntab 2) neol)
+     (qz-line 0 1 "")
+     (qz-tcgciws-if-post-insert-update locals (+ ntab 2) neol)
+     (qz-line (+ ntab 2) 1 "$data['data'] = \"Sukses\";")
+     (qz-tcgciws-if-post-close ntab neol t))))
 
 (defun qz-tcgciws-function-content-if-get (fields &optional ntab neol)
   "Content with conditional term to access."
@@ -162,19 +145,17 @@
     (setq ntab 0))
   (unless neol
     (setq neol 1))
-  (let ((valids (qz-tcgciws-get-filtered-fields
-                 (qz-localize-fields fields) "validations")))
+  (let ((locals (qz-localize-fields fields))
+        (valids (qz-filter-fields (qz-localize-fields fields)
+                                  "validations")))
     (concat
      (qz-ci-data-validation valids ntab neol t)
      (qz-line 0 1 "")
-     (qz-tcgciws-if-post-open
-      (butlast (qz-localize-fields fields)) ntab neol)
+     (qz-tcgciws-if-post-open (butlast locals) ntab neol)
      (qz-ci-query-select-multi-line fields (+ ntab 2) neol)
      (qz-line 0 1 "")
      (qz-tcgciws-get-query-content
-      fields (+ ntab 2) neol
-      (qz-tcgciws-get-filtered-fields
-       (qz-localize-fields fields) "query conditions"))
+      fields (+ ntab 2) neol (qz-filter-fields locals "query conditions"))
      (qz-tcgciws-if-post-close ntab neol))))
 
 (defun qz-tcgciws-if-post-insert-update (fields &optional ntab neol)
@@ -188,16 +169,16 @@
     (concat
      (qz-line ntab 0 (format "if ($%s = " (qz-form-field field)))
      (qz-line 0 0 "$this->input->post")
-     (qz-line 0 1 (format "('%s')) {" (qz-form-field field)))
+     (qz-line 0 neol (format "('%s')) {" (qz-form-field field)))
      (qz-line (+ ntab 1) 0 "$this->db->where")
      (qz-line 0 0 (format "('%s'" (qz-trim-field field)))
-     (qz-line 0 1 (format ", $%s);" (qz-form-field field)))
+     (qz-line 0 neol (format ", $%s);" (qz-form-field field)))
      (qz-line (+ ntab 1) 0 "$this->db->update")
-     (qz-line 0 1 (format "('%s', $data_%s);" table table))
-     (qz-line ntab 1 "} else {")
+     (qz-line 0 neol (format "('%s', $data_%s);" table table))
+     (qz-line ntab neol "} else {")
      (qz-line (+ ntab 1) 0 "$this->db->insert")
-     (qz-line 0 1 (format "('%s', $data_%s);" table table))
-     (qz-line ntab 1 "}"))))
+     (qz-line 0 neol (format "('%s', $data_%s);" table table))
+     (qz-line ntab neol "}"))))
 
 (defun qz-tcgciws-if-post-open (fields &optional ntab neol)
   "Content condition for input or conditional access."
@@ -217,9 +198,9 @@
                    )))
     (concat
      (qz-line ntab 0 "if ($this->input->post")
-     (qz-line 0 1 (format "('%s')) {" (qz-form-field choosen)))
+     (qz-line 0 neol (format "('%s')) {" (qz-form-field choosen)))
      (qz-line (+ ntab 1) 0 "if ($this->form_validation")
-     (qz-line 0 1 "->run() !== FALSE) {")
+     (qz-line 0 neol "->run() !== FALSE) {")
      (qz-line 0 neol ""))))
 
 (defun qz-tcgciws-if-post-close (&optional ntab neol result)
@@ -230,10 +211,10 @@
     (setq neol 1))
   (concat
    (when result
-     (qz-line (+ ntab 2) 1 "$data['result'] = 'true';"))
-   (qz-line (+ ntab 1) 1 "} else {")
-   (qz-line (+ ntab 2) 1 "$data['data'] = \"Gagal validasi\";")
-   (qz-line (+ ntab 1) 1 "}")
+     (qz-line (+ ntab 2) neol "$data['result'] = 'true';"))
+   (qz-line (+ ntab 1) neol "} else {")
+   (qz-line (+ ntab 2) neol "$data['data'] = \"Gagal validasi\";")
+   (qz-line (+ ntab 1) neol "}")
    (qz-line ntab neol "}")))
 
 ;;; commands
