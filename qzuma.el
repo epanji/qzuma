@@ -3,7 +3,7 @@
 ;; Copyright (C) 2017  Panji Kusuma
 
 ;; Author: Panji Kusuma <epanji@gmail.com>
-;; Version: 0.0.2
+;; Version: 0.0.3
 ;; Created: 13 August 2017
 ;; Keywords: convenience, qzuma
 
