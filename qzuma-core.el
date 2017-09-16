@@ -164,5 +164,20 @@ When PURE is true, exclude other foreign field from fields."
              (unless (qz-key-p f) f))
          fields)))
 
+(defun qz-filter-fields (fields &optional string)
+  "Filter fields with comma separated."
+  (unless string
+    (setq string "fields"))
+  (completing-read-multiple
+   (concat
+    "Optional " string " with comma (nil): ") ; prompt
+   (butlast fields)                           ; collection
+   nil                                        ; predicate
+   t                                          ; require-match
+   nil                                        ; initial-input
+   nil                                        ; hist
+   nil                                        ; def
+   ))
+
 (provide 'qzuma-core)
 ;;; qzuma-core.el ends here
