@@ -129,19 +129,7 @@
      (qz-ci-data-join fields ntab neol)
      (qz-line ntab 1 (format "$this->db->where('%s', '1');" flag))
      (when wheres
-       (let ((container ""))
-         (mapc
-          (lambda (field)
-            (setq
-             container
-             (concat
-              container
-              (qz-line ntab 0 "$this->db->where")
-              (qz-line 0 0 (format "('%s', " field))
-              (qz-line 0 0 "$this->input->post(")
-              (qz-line 0 1 (format "'%s'));" (qz-form-field field))))))
-          wheres)
-         container))
+       (qz-ci-data-where wheres ntab neol t))
      (qz-line ntab 0 (format "$q_%s = $this->" table))
      (qz-line 0 1 (format "db->get('%s');" table))
      (qz-line ntab 1 (format "if ($q_%s->num_rows() > 0) {" table))
