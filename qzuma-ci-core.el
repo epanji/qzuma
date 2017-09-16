@@ -191,6 +191,36 @@ EXCEPTION must be the name of table as string or nil."
          joins "")
       "")))
 
+(defun qz-ci-line-where (field &optional excluded)
+  "Create line query where."
+  (if excluded ""
+    (concat
+     (format "$this->db->where('%s', " field)
+     (format "$this->input->post('%s'));" (qz-form-field field)))))
+
+(defun qz-ci-data-where (fields &optional ntab neol exception)
+  "Create multiple line query where.
+EXCEPTION could be t if all fields want to be included."
+  (unless ntab
+    (setq ntab 0))
+  (unless neol
+    (setq neol 1))
+  (unless exception
+    (setq exception nil))
+  (if (or (qz-table-p fields) exception)
+      (let ((wheres (if exception
+                        (qz-localize-fields fields)
+                      (cdr (butlast (qz-localize-fields fields))))))
+        (mapconcat
+         #'(lambda (f)
+             (let ((line (qz-ci-line-where f (if exception
+                                                 nil
+                                               (or (qz-ci-textarea-p f)
+                                                   (qz-ci-file-p f))))))
+               (if (string-equal line "") ""
+                 (qz-line ntab neol line))))
+         wheres "")) ""))
+
 
 
 (qz-define-field-type
