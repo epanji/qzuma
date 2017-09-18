@@ -375,7 +375,7 @@
                (qz-line 0 0 "\"glyphicon glyphicon-plus-sign\">")
                (qz-line 0 2 " Tambah</span></a>")
                (qz-line 0 0 "<?php include(")
-               (qz-line 0 1 "\"v_dashboard_footer.php\") ?>") ))
+               (qz-line 0 1 "\"v_dashboard_footer.php\") ?>")))
 		  (print "Selected region not well formatted")))
     (print "No region selected")))
 
