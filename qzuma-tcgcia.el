@@ -26,5 +26,59 @@
 
 (require 'qzuma-ci-core)
 
+(qz-define-field-type
+ "qz-tcgcia" "actor" "User"
+ "username$"
+ "email$"
+ "nip$"
+ "nim$")
+
+(qz-define-field-type
+ "qz-tcgcia" "credential" "Credential"
+ "password$"
+ "passwd$")
+
+
+
+(defun qz-tcgcia-actor-credential (fields &optional exception)
+  "Exclude other fields beside actor and credential."
+  (unless exception
+    (setq exception nil))
+  (remq
+   nil
+   (mapcar
+    #'(lambda (f)
+        (when (or (qz-tcgcia-actor-p f)
+                  (qz-tcgcia-credential-p f))
+          f))
+    (if exception
+        fields
+      (qz-localize-fields fields)))))
+
+;;; commands
+
+(defun qz-tcgcia-create-controller ()
+  "")
+
+(defun qz-tcgcia-create-view-index ()
+  "")
+
+(defun qz-tcgcia-create-view-home ()
+  "Create home view as redirection target after login."
+  (interactive)
+  (let ((controller (downcase (read-from-minibuffer "Controller name: "))))
+    (qz-open-clear-buffer (format "%s_home.php" controller))
+    (when (fboundp 'web-mode) (web-mode))
+    (insert
+     (qz-line 0 2 "<?php include(\"v_dashboard_header.php\") ?>")
+     (qz-ci-flash-message 0 1 "pesan")
+     (qz-line 0 1 "")
+     (qz-line 0 2 "<h3>Selamat datang.</h3>")
+     (qz-line 0 0 "<?php include(")
+     (qz-line 0 1 "\"v_dashboard_footer.php\") ?>"))))
+
+(defun qz-tcgcia-create-view-password ()
+  "")
+
 (provide 'qzuma-tcgcia)
 ;;; qzuma-tcgcia.el ends here
