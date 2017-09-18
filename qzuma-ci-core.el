@@ -302,6 +302,18 @@ EXCEPTION could be t if all fields want to be included."
  "deskripsi$"
  "keterangan$")
 
+(qz-define-field-type
+ "qz-ci" "credential" "type=\"password\""
+
+ ;; english
+ "password$"
+ "passwd$"
+ "secret$"
+
+ ;; indonesia
+ "sandi$"
+ "rahasia$")
+
 
 
 (defun qz-ci-define-private-upload (&optional ntab neol)
@@ -544,6 +556,7 @@ EXCEPTION could be t if first field want to be included."
     (setq neol 1))
   (let ((input-type (cond ((qz-ci-file-p name) qz-ci-file-alias)
                           ((qz-ci-textarea-p name) qz-ci-textarea-alias)
+                          ((qz-ci-credential-p name) qz-ci-credential-alias)
                           (t "type=\"text\"")))
         (input-class (cond ((qz-ci-file-p name) "btn btn-default")
                            ((qz-ci-textarea-p name)
@@ -571,9 +584,12 @@ EXCEPTION could be t if first field want to be included."
         (qz-line 0 0 (format "class=\"%s\" " input-class))
         (qz-line 0 0 (format "%s " input-type))
         (qz-line 0 0 (format "name=\"%s\" " (qz-form-field name)))
-        (qz-line 0 0 (format "%s<?php echo " value-open))
-        (qz-line 0 0 (format "set_value('%s'" (qz-form-field name)))
-        (qz-line 0 0 (format ", @$row->%s);?>" (qz-trim-field name)))
+        (qz-line 0 0 (format "%s" value-open))
+        (unless (qz-ci-credential-p name)
+          (concat
+           (qz-line 0 0 "<?php echo ")
+           (qz-line 0 0 (format "set_value('%s'" (qz-form-field name)))
+           (qz-line 0 0 (format ", @$row->%s);?>" (qz-trim-field name)))))
         (qz-line 0 neol (format "%s" value-close))))
      (qz-line (+ ntab 2) 0 "<?php echo form_error")
      (qz-line 0 neol (format "('%s'); ?>" (qz-form-field name)))
