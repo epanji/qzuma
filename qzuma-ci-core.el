@@ -303,6 +303,20 @@ EXCEPTION could be t if all fields want to be included."
  "keterangan$")
 
 (qz-define-field-type
+ "qz-ci" "actor" "User" "type=\"text\""
+
+ ;; english
+
+ "username$"
+ "email$"
+
+ ;; indonesia
+
+ "nip$"
+ "nim$"
+ "nis$")
+
+(qz-define-field-type
  "qz-ci" "credential" "type=\"password\""
 
  ;; english
