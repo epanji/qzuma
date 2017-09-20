@@ -437,6 +437,7 @@ EXCEPTION could be t if all fields want to be included."
      (qz-line 0 1 "{")
      (qz-line 1 1 "public function __construct() {")
      (qz-line 2 1 "parent::__construct();")
+     (qz-line 2 1 "$this->load->library('form_validation');")
      (let ((models (remq nil (mapcar
                               #'(lambda (f)
                                   (when (qz-identity-p f) f))
