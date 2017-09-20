@@ -204,7 +204,7 @@ If EXCEPTION is t, no need to localize fields."
        (qz-line (+ ntab 2) 0 "$this->db->update")
        (qz-line 0 (+ neol 1) (format "('%s', $newd);" table))
        (qz-line (+ ntab 2) 0 "$this->session->set_flashdata('pesan'")
-       (qz-line 0 neol ", 'Password berhasil di-perbarui');")
+       (qz-line 0 neol ", 'Password berhasil diperbarui');")
        (qz-line (+ ntab 2) 0 "redirect(base_url()")
        (qz-line 0 neol (format ".'%s/password/');" (downcase controller)))
        (qz-line (+ ntab 1) neol "}")
@@ -243,7 +243,6 @@ If EXCEPTION is t, no need to localize fields."
                       (region-end)))
              (controller (downcase (read-from-minibuffer
                                     "Controller name: ")))
-             (table (qz-table-name fields))
              (actor-credential (qz-tcgcia-actor-credential fields))
              (actor (elt actor-credential 0))
              (credential (elt actor-credential 1)))
@@ -386,6 +385,8 @@ If EXCEPTION is t, no need to localize fields."
               (when (fboundp 'web-mode) (web-mode))
               (insert
                (qz-line 0 2 "<?php include(\"v_dashboard_header.php\") ?>")
+               (qz-ci-flash-message 0 1 "pesan")
+               (qz-line 0 1 "")
                (qz-tcgcia-form-password (elt actor-credential 1) 0 1)
                (qz-line 0 1 "")
                (qz-line 0 0 "<?php include(")
