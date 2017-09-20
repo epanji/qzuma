@@ -3,7 +3,7 @@
 ;; Copyright (C) 2017  Panji Kusuma
 
 ;; Author: Panji Kusuma <epanji@gmail.com>
-;; Version: 0.0.3
+;; Version: 0.0.4
 ;; Created: 13 August 2017
 ;; Keywords: convenience, qzuma
 
@@ -29,6 +29,7 @@
 (require 'qzuma-twbs)
 (require 'qzuma-tcgci)
 (require 'qzuma-tcgciws)
+(require 'qzuma-tcgcia)
 
 (provide 'qzuma)
 ;;; qzuma.el ends here
