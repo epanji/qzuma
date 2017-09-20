@@ -328,6 +328,40 @@ EXCEPTION could be t if all fields want to be included."
  "sandi$"
  "rahasia$")
 
+(qz-define-field-type
+ "qz-ci" "datetime" ""
+
+ ;; english
+ "datetime$"
+ "created$"
+ "updated$"
+ "published$"
+
+ ;; indonesia
+ "pembuatan$"
+ "pembaharuan$"
+ "publikasi$")
+
+(qz-define-field-type
+ "qz-ci" "date" ""
+
+ ;; english
+ "date$"
+
+ ;; indonesia
+ "tanggal$"
+ "tgl$")
+
+(qz-define-field-type
+ "qz-ci" "time" ""
+
+ ;; english
+ "time$"
+
+ ;; indonesia
+ "waktu$"
+ "pukul$")
+
 
 
 (defun qz-ci-define-private-upload (&optional ntab neol)
@@ -576,6 +610,12 @@ EXCEPTION could be t if first field want to be included."
         (input-class (cond ((qz-ci-file-p name) "btn btn-default")
                            ((qz-ci-textarea-p name)
                             "form-control ckeditor\" rows=\"10")
+                           ((qz-ci-datetime-p name)
+                            "form-control datetimepicker")
+                           ((qz-ci-date-p name)
+                            "form-control datepicker")
+                           ((qz-ci-time-p name)
+                            "form-control timepicker")
                            (t "form-control")))
         (input-tag (if (qz-ci-textarea-p name) "textarea" "input"))
         (value-open (if (qz-ci-textarea-p name) "value=\"\">" "value=\""))
