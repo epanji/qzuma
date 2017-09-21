@@ -24,18 +24,18 @@
 
 ;;; Code:
 
-(defmacro qz-line (ntab neol &rest body)
+(defmacro qz-line (&rest body)
   "Create new line with numbered tab and numbered end-of-line.
 The argument to this command are as follow:
 
-NTAB: an integer of character tab.
-NEOL: an integer of character end-of-line.
 BODY: sequences of argument which each argument may be a string or a
       list or vector of characters (integers) list of string or
-      expression that return string body of line."
-  `(let ((n1 (if (integerp ,ntab) ,ntab 0))
-         (n2 (if (integerp ,neol) ,neol 0)))
-     (concat (make-string n1 ?\t) ,@body (make-string n2 ?\n))))
+      expression that return string body of line. Integer could be set
+      at FIRST up to SECOND argument to represent number of tab and
+      number of end-of-line respectively."
+  (let* ((n1 `(if (integerp ,(car body)) ,(pop body) 0))
+         (n2 `(if (integerp ,(car body)) ,(pop body) 0)))
+    `(concat (make-string ,n1 ?\t) ,@body (make-string ,n2 ?\n))))
 
 (defmacro qz-define-read-prompt (prefix read-name key-string alist-string
                                         &optional html-template)
