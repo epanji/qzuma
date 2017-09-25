@@ -128,8 +128,8 @@ If EXCEPTION is t, no need to localize fields."
       (concat
        (qz-line ntab (+ neol 1) "$data = array();")
        (qz-line ntab 0 "$this->form_validation->")
-       (qz-line 0 0 "set_error_delimiters('<br />")
-       (qz-line 0 neol "<span class=\"error\">', '</span>');")
+       (qz-line 0 0 "set_error_delimiters('")
+       (qz-line 0 neol "<span class=\"help-block error\">', '</span>');")
        (qz-ci-data-validation login-fields ntab neol t)
        (qz-line 0 1 "")
        (qz-line ntab neol "if ($this->input->post('btn_login')) {")
